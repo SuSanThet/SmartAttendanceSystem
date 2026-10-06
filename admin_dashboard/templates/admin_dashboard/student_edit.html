@@ -1,0 +1,585 @@
+{% extends "admin_dashboard/base.html" %}
+
+{% block extra_css %}
+<style>
+    .icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .icon-blue-light {
+        background-color: #e8f1ff;
+        color: #0d6efd;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+    }
+
+    .form-label {
+        margin-bottom: 8px;
+    }
+
+    .avatar-preview {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        background-color: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        margin: 0 auto;
+    }
+
+    .avatar-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .photo-upload-box {
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        background-color: #f8fafc;
+    }
+
+    .form-control {
+        border-radius: 10px;
+    }
+
+    .form-control:focus {
+        border-color: #4f46e5 !important;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.2) !important;
+    }
+
+    .readonly-input {
+        background-color: #f8fafc;
+        cursor: not-allowed;
+    }
+
+    .custom-select {
+        width: 100%;
+    }
+
+    .ts-control {
+        border-radius: 10px !important;
+        min-height: 38px;
+    }
+
+    .ts-control.disabled {
+        background-color: #f8fafc !important;
+        cursor: not-allowed;
+        opacity: 1 !important;
+    }
+</style>
+{% endblock %}
+
+
+{% block title %}
+Edit Student
+{% endblock %}
+
+
+{% block content %}
+
+<!-- Breadcrumb -->
+
+<nav class="mb-4">
+
+    <ol class="breadcrumb">
+
+        <li class="breadcrumb-item">
+
+            <a
+                href="{% url 'admin_dashboard:student' %}"
+                class="text-decoration-none"
+            >
+                Students
+            </a>
+
+        </li>
+
+        <li class="breadcrumb-item">
+
+            <a
+                href="{% url 'admin_dashboard:student_detail' student.ID %}"
+                class="text-decoration-none"
+            >
+                {{ student.name }}
+            </a>
+
+        </li>
+
+        <li class="breadcrumb-item">
+            Edit Student
+        </li>
+
+    </ol>
+
+</nav>
+
+
+<!-- Student Edit Form -->
+
+<form
+    method="POST"
+    enctype="multipart/form-data"
+    class="mt-4"
+>
+
+    {% csrf_token %}
+
+
+    <div class="row g-3">
+
+        <!-- Left Section -->
+
+        <div class="col-lg-4">
+
+            <div class="photo-upload-box p-4 text-center">
+
+                <div class="avatar-preview mb-3">
+
+                    {% if student.profile_photo %}
+
+                        <img
+                            id="previewImg"
+                            src="{{ student.profile_photo.url }}"
+                            alt="Student Photo"
+                        >
+
+                        <i
+                            id="defaultIcon"
+                            class="fa-solid fa-user text-secondary fs-1 d-none"
+                        ></i>
+
+                    {% else %}
+
+                        <i
+                            id="defaultIcon"
+                            class="fa-solid fa-user text-secondary fs-1"
+                        ></i>
+
+                        <img
+                            id="previewImg"
+                            src=""
+                            alt="Preview"
+                            class="d-none"
+                        >
+
+                    {% endif %}
+
+                </div>
+
+
+                <label
+                    for="photoInput"
+                    class="btn btn-outline-secondary btn-sm mb-2"
+                >
+
+                    <i class="fa-solid fa-camera me-1"></i>
+                    Change Photo
+
+                </label>
+
+
+                <input
+                    type="file"
+                    id="photoInput"
+                    class="d-none"
+                    name="profile_photo"
+                    accept="image/*"
+                >
+
+
+                <div
+                    class="form-text text-muted"
+                    style="font-size: 0.75rem;"
+                >
+                    JPG, PNG or GIF (Max 2MB)
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Right Section -->
+
+        <div class="col-lg-8">
+
+            <div class="row">
+
+                <!-- Name -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="fullName"
+                        class="form-label fw-semibold"
+                    >
+                        Full Name
+                        <span class="text-danger">*</span>
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="fullName"
+                        class="form-control"
+                        name="name"
+                        value="{{ student.name }}"
+                        placeholder="Enter Full Name"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Roll Number -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="rollNumber"
+                        class="form-label fw-semibold"
+                    >
+                        Roll Number
+                        <span class="text-danger">*</span>
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="rollNumber"
+                        class="form-control readonly-input"
+                        name="ID"
+                        value="{{ student.ID }}"
+                        readonly
+                    >
+
+                </div>
+
+
+                <!-- Section -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="selectSection"
+                        class="form-label fw-semibold"
+                    >
+                        Section
+                        <span class="text-danger">*</span>
+                    </label>
+
+
+                    <select
+                        id="selectSection"
+                        class="custom-select"
+                        name="section_display"
+                        data-placeholder="Select Section"
+                        disabled
+                    >
+
+                        <option value=""></option>
+
+
+                        {% for section in sections %}
+
+                        <option
+                            value="{{ section.id }}"
+                            {% if student.section_id == section.id %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ section.sem }} {{ section.name }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+
+                    <!-- Keep Section value when disabled -->
+
+                    <input
+                        type="hidden"
+                        name="section"
+                        value="{{ student.section_id }}"
+                    >
+
+                </div>
+
+
+                <!-- Major -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="selectMajor"
+                        class="form-label fw-semibold"
+                    >
+                        Major
+                        <span class="text-danger">*</span>
+                    </label>
+
+
+                    <select
+                        id="selectMajor"
+                        class="custom-select"
+                        name="major_display"
+                        data-placeholder="Select Major"
+                        disabled
+                    >
+
+                        <option value=""></option>
+
+
+                        {% for major in majors %}
+
+                        <option
+                            value="{{ major.id }}"
+                            {% if student.major_id == major.id %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ major.name }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+
+                    <!-- Keep Major value when disabled -->
+
+                    <input
+                        type="hidden"
+                        name="major"
+                        value="{{ student.major_id }}"
+                    >
+
+                </div>
+
+
+                <!-- Email -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="email"
+                        class="form-label fw-semibold"
+                    >
+                        Email
+                        <span class="text-danger">*</span>
+                    </label>
+
+
+                    <input
+                        type="email"
+                        id="email"
+                        class="form-control"
+                        name="email"
+                        value="{{ student.email }}"
+                        placeholder="Enter email"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Phone -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="phone"
+                        class="form-label fw-semibold"
+                    >
+                        Phone Number
+                        <span class="text-danger">*</span>
+                    </label>
+
+
+                    <input
+                        type="tel"
+                        class="form-control"
+                        id="phone"
+                        name="phone"
+                        value="{{ student.phone|default:'' }}"
+                        placeholder="Enter phone number"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Status -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="status"
+                        class="form-label fw-semibold"
+                    >
+                        Status
+                    </label>
+
+
+                    <select
+                        id="status"
+                        class="custom-select"
+                        name="is_active"
+                        data-placeholder="Select Status"
+                    >
+
+                        <option
+                            value="1"
+                            {% if student.is_active %}
+                                selected
+                            {% endif %}
+                        >
+                            Active
+                        </option>
+
+                        <option
+                            value="0"
+                            {% if not student.is_active %}
+                                selected
+                            {% endif %}
+                        >
+                            Inactive
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Action Buttons -->
+
+    <div class="d-flex justify-content-end mt-3">
+
+        <a
+            href="{% url 'admin_dashboard:student_detail' student.ID %}"
+            class="btn btn-outline-danger me-2"
+        >
+            Cancel
+        </a>
+
+
+        <button
+            type="submit"
+            class="btn btn-outline-primary"
+        >
+            <i class="fa-regular fa-floppy-disk me-1"></i>
+            Update Student
+        </button>
+
+    </div>
+
+</form>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+
+const photoInput =
+    document.getElementById("photoInput");
+
+const previewImg =
+    document.getElementById("previewImg");
+
+const defaultIcon =
+    document.getElementById("defaultIcon");
+
+
+photoInput.addEventListener(
+    "change",
+    function(e) {
+
+        const file = e.target.files[0];
+
+        if (file) {
+
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+
+                previewImg.src =
+                    event.target.result;
+
+                previewImg.classList.remove(
+                    "d-none"
+                );
+
+                defaultIcon.classList.add(
+                    "d-none"
+                );
+
+            };
+
+            reader.readAsDataURL(file);
+
+        }
+
+    }
+);
+
+
+document
+    .querySelectorAll(".custom-select")
+    .forEach((selects) => {
+
+        new TomSelect(
+            selects,
+            {
+                controlInput: null,
+
+                placeholder:
+                    selects.dataset.placeholder,
+
+                create: false,
+
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                },
+
+                onInitialize: function() {
+
+                    this.control_input.setAttribute(
+                        "readonly",
+                        true
+                    );
+
+                }
+
+            }
+        );
+
+    });
+
+</script>
+
+{% endblock %}

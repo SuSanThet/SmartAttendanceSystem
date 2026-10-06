@@ -1,0 +1,191 @@
+{% extends "admin_dashboard/base.html" %}
+
+{% block extra_css %}
+<style>
+    /* Start Profile Styling */
+    .avatar-preview {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background-color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+    .avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* End Profile Styling */
+</style>
+{% endblock %}
+
+{% block content %}
+             <!-- Start Breadcrumb -->
+             <nav class="mb-4">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item">
+                     <a href="{%url 'teacher'%}" class="text-decoration-none text-black">Teachers</a>
+                  </li>
+                  <li class="breadcrumb-item text-primary">{{ teacher.name }}</li>
+                </ol>
+             </nav>
+             <!-- End Breadcrumb -->
+
+            <!-- Start Content Section -->
+
+            <div class="row g-4">
+                <!-- start left profile card -->
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm rounded-4 text-center p-4">
+
+                        <div class="card-body">
+                            <!-- Teacher Avatar Preview -->
+                            <div class="avatar-preview shadow-sm mb-3 position-relative shadow-sm mb-3 position-relative" style="width: 140px; height: 140px; border: 4px solid #fff;">
+                                {{ teacher.name|first|upper }}
+                            </div>
+
+
+                            <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 mb-3 fw-semibold">
+                                Teacher ID-{{ teacher.TrID }}
+                            </span>
+
+                            <div class="border-top pt-3 mt-auto">
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- end left profile card -->
+
+                <!-- Start Teacher Info Details -->
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-sm rounded-4 p-4">
+
+                        <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+                            <h5 class="fw-bold text-dark m-0">
+                               <i class="bi bi-person-lines-fill text-primary me-2"></i>Personal  Information
+                            </h5>
+                            <a href="{% url 'edit_teacher' teacher.TrID %}" class="btn btn-outline-primary">
+                            <i class="fa-regular fa-pen-to-square"></i>Edit</a>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Name -->
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-3 border-0">
+                                   <small class="text-muted d-block mb-1">Full Name</small>
+                                   <span class="fw-semibold text-dark">{{ teacher.name }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-3 border-0">
+                                   <small class="text-muted d-block mb-1">Email</small>
+                                   <span class="fw-semibold text-dark">{{ teacher.email }}</span>
+                                </div>
+                            </div>
+                            <!-- Department-->
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-3 border-0">
+                                   <small class="text-muted d-block mb-1">Department</small>
+                                   <span class="fw-semibold text-dark">{{ teacher.dept }}</span>
+                                </div>
+                            </div>
+
+
+                            <!-- Phone Number -->
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-3 border-0">
+                                   <small class="text-muted d-block mb-1">Phone Number</small>
+                                   <span class="fw-semibold text-dark">{{ teacher.phone }}</span>
+                                </div>
+                            </div>
+                            <!-- Subject -->
+                            <div class="card shadow-sm mt-4">
+
+    <div class="card-header bg-white">
+
+        <h5 class="mb-0">
+            Subjects & Teaching Classes
+        </h5>
+
+    </div>
+
+    <div class="card-body">
+
+        {% if teaching %}
+
+            {% for sem, subjects in teaching.items %}
+
+                <div class="mb-4">
+
+                    <h6 class="fw-bold text-primary mb-3">
+                        Semester={{ sem }}
+                    </h6>
+
+                    {% for subject_id, item in subjects.items %}
+
+                        <div class="border rounded p-3 mb-3">
+
+                            <div class="fw-semibold">
+
+                                {{ item.subject.code }}
+                                -
+                                {{ item.subject.name }}
+
+                            </div>
+
+                            <div class="mt-2">
+
+                                <small class="text-muted">
+                                    Sections:
+                                </small>
+
+                                {% for section in item.sections %}
+
+                                    <span class="badge bg-light text-dark border me-1">
+                                        {{ section }}
+                                    </span>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="text-muted text-center py-4">
+
+                No teaching classes assigned.
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- End Student Info Details -->
+            </div>
+            <!-- End Content Section -->
+{% endblock %}

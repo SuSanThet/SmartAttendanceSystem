@@ -1,0 +1,187 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}Schedule Builder{% endblock %}
+
+{% block content %}
+<style>
+.builder-wrapper { max-width: 1300px; margin: 0 auto; }
+
+.page-header { margin-bottom: 20px; }
+.page-title { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+.breadcrumbs { font-size: 13px; color: #64748b; }
+.breadcrumbs a { color: #64748b; text-decoration: none; }
+
+.class-picker {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px 22px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.class-picker label { font-size: 14px; font-weight: 600; color: #334155; }
+
+.class-picker select {
+  padding: 9px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 260px;
+  background: #ffffff;
+}
+
+.class-picker button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.grid-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  overflow-x: auto;
+}
+
+.empty-hint {
+  color: #94a3b8;
+  font-size: 14px;
+  text-align: center;
+  padding: 40px 10px;
+}
+
+.grid-table { width: 100%; border-collapse: collapse; min-width: 760px; }
+
+.grid-table th {
+  text-align: center;
+  padding: 12px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  background-color: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.grid-table td {
+  padding: 8px;
+  border: 1px solid #f1f5f9;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.time-col {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
+  background-color: #f8fafc;
+}
+
+.slot-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  border-radius: 8px;
+  border: 1.5px dashed #cbd5e1;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 16px;
+  transition: all 0.15s ease;
+}
+
+.slot-empty:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+  background-color: #eff6ff;
+}
+
+.slot-filled {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 64px;
+  border-radius: 8px;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  text-decoration: none;
+  padding: 6px 8px;
+  transition: all 0.15s ease;
+}
+
+.slot-filled:hover { background-color: #dbeafe; }
+.slot-filled strong { font-size: 13px; }
+.slot-filled span { font-size: 11px; color: #2563eb; }
+.slot-filled small { font-size: 10px; color: #64748b; }
+</style>
+
+<div class="builder-wrapper">
+  <div class="page-header">
+    <h1 class="page-title">Schedule Builder</h1>
+    <div class="breadcrumbs"><a href="{% url 'schedule_list' %}">All Schedules</a> &gt; <span>Builder</span></div>
+  </div>
+
+  <form method="GET" class="class-picker">
+    <label for="class_group">Class:</label>
+    <select name="class_group" id="class_group">
+      <option value="">-- Select a class --</option>
+      {% for c in class_groups %}
+        <option value="{{ c.id }}" {% if selected_class and c.id == selected_class.id %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Load</button>
+       <a href="{% url 'schedule_add' %}" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Schedule</a>
+        <a href="{% url 'schedule_list' %}" class="btn btn-primary"><i class="fa-solid fa-list"></i>All schedule</a>
+  </div>
+  </form>
+
+  <div class="grid-card">
+    {% if not selected_class %}
+      <p class="empty-hint">Pick a class above to view or build its weekly timetable.</p>
+    {% elif not time_slots %}
+      <p class="empty-hint">No time slots exist yet. Add them under "Manage Data" (Time Slots), or run <code>python manage.py seed_schedule_data</code> for a starter set.</p>
+    {% else %}
+      <table class="grid-table">
+        <thead>
+          <tr>
+            <th class="time-col">Time</th>
+            {% for cell in grid.0.cells %}<th>{{ cell.day_label }}</th>{% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in grid %}
+          <tr>
+            <td class="time-col">{{ row.time_slot }}</td>
+            {% for cell in row.cells %}
+              <td>
+                {% if cell.entry %}
+                  <a class="slot-filled" href="{% url 'schedule_edit' cell.entry.id %}">
+                    <strong>{{ cell.entry.subject.code }}</strong>
+                    <span>{{ cell.entry.teacher.full_name }}</span>
+                    {% if cell.entry.room %}<small>{{ cell.entry.room }}</small>{% endif %}
+                  </a>
+                {% else %}
+                  <a class="slot-empty" href="{% url 'schedule_add' %}?class_group={{ selected_class.id }}&day={{ cell.day }}&time_slot={{ row.time_slot.id }}" title="Add subject">
+                    <i class="fa-solid fa-plus"></i>
+                  </a>
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

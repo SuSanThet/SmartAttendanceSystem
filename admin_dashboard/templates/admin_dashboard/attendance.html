@@ -1,0 +1,378 @@
+
+{% extends "admin_dashboard/base.html" %}
+
+{% block extra_css %}
+<style>
+    .form-control {
+        border-radius: 10px;
+    }
+
+    .form-control:focus {
+        border-color: #4f46e5 !important;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.2) !important;
+    }
+
+    .custom-select {
+        border-radius: 10px;
+        width: 100%;
+        padding: 8px 12px;
+    }
+
+    .table th {
+        white-space: nowrap;
+    }
+
+    .table td {
+        white-space: nowrap;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<!-- Start Breadcrumb -->
+<nav class="mb-4">
+    <ol class="breadcrumb">
+
+        <li class="breadcrumb-item">
+            <a href="{% url 'admin_dashboard:admin_dashboard' %}"
+               class="text-decoration-none text-black">
+                Dashboard
+            </a>
+        </li>
+
+        <li class="breadcrumb-item text-primary">
+            Attendance Records
+        </li>
+
+    </ol>
+</nav>
+<!-- End Breadcrumb -->
+
+
+<div class="container p-4">
+
+
+    <!-- Filter Form -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+
+        <div class="card-body p-4">
+
+            <form method="GET">
+
+                <div class="row g-3">
+
+
+                    <!-- Section -->
+                    <div class="col-lg-3">
+
+                        <label class="form-label text-muted fw-bold">
+                            Section
+                        </label>
+
+                        <select class="custom-select bg-light border-0"
+                                name="section">
+
+                            <option value="All Sections">
+                                All Sections
+                            </option>
+
+                            {% for section in sections %}
+
+                                <option value="{{ section.id }}"
+                                    {% if selected_section == section.id|stringformat:"s" %}
+                                        selected
+                                    {% endif %}>
+
+                                    {{ section.sem }} Section-{{ section.name }}
+
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Date -->
+                    <div class="col-lg-3">
+
+                        <label class="form-label text-muted fw-bold">
+                            Date
+                        </label>
+
+                        <input type="date"
+                               class="form-control"
+                               name="date"
+                               value="{{ selected_date|date:'Y-m-d' }}">
+
+                    </div>
+
+
+                    <!-- Year -->
+                    <div class="col-lg-3">
+
+                        <label class="form-label text-muted fw-bold">
+                            Year
+                        </label>
+
+                        <select class="custom-select"
+                                disabled>
+
+                            <option selected>
+                                {{ current_year }}
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Buttons -->
+                    <div class="col-lg-3 d-flex align-items-end">
+
+                        <button type="submit"
+                                class="btn btn-outline-success fw-bold me-3">
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            Filter
+
+                        </button>
+
+
+                        <a href="{% url 'admin_dashboard:attendance' %}"
+                           class="btn btn-outline-primary fw-bold">
+
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Reset
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Attendance Table -->
+    <div class="card shadow-sm p-0 overflow-hidden rounded-4">
+
+        <div class="card-header bg-white border-0 p-4">
+
+            <h5 class="fw-bold mb-0">
+
+                <i class="bi bi-clipboard-check text-primary me-2"></i>
+
+                Attendance Records
+
+            </h5>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-secondary text-center">
+
+                    <tr>
+
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Roll No</th>
+                        <th>Section</th>
+                        <th>Subject</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Method</th>
+                        <th>Marked By</th>
+                        <th>Remark</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% for record in records %}
+
+                    <tr class="text-center">
+
+
+                        <!-- No -->
+                        <td>
+                            {{ forloop.counter }}
+                        </td>
+
+
+                        <!-- Student Name -->
+                        <td>
+                            {{ record.student.name }}
+                        </td>
+
+
+                        <!-- Student ID -->
+                        <td>
+                            {{ record.student.ID }}
+                        </td>
+
+
+                        <!-- Section -->
+                        <td>
+
+                            {{ record.section.sem }}
+                            Section-{{ record.section.name }}
+
+                        </td>
+
+
+                        <!-- Subject -->
+                        <td>
+
+                            {{ record.schedule.subject.code }}
+
+                        </td>
+
+
+                        <!-- Date -->
+                        <td>
+
+                            {{ selected_date|date:"d/m/Y" }}
+
+                        </td>
+
+
+                        <!-- Status -->
+                        <td>
+
+                            {% if record.status == "PRESENT" %}
+
+                                <span class="badge bg-success">
+                                    Present
+                                </span>
+
+                            {% elif record.status == "ABSENT" %}
+
+                                <span class="badge bg-danger">
+                                    Absent
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Method -->
+                        <td>
+
+                            {% if record.method == "QR" %}
+
+                                <span class="badge bg-primary">
+                                    QR Scan
+                                </span>
+
+                            {% elif record.method == "MANUAL" %}
+
+                                <span class="badge bg-secondary">
+                                    Manual
+                                </span>
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Marked By -->
+                        <td>
+
+                            {{ record.schedule.teacher.name }}
+
+                        </td>
+
+
+                        <!-- Remark -->
+                        <td>
+
+                            {% if record.remark %}
+
+                                {{ record.remark }}
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="10"
+                            class="text-center text-muted py-5">
+
+                            <i class="bi bi-clipboard-x fs-3 d-block mb-2"></i>
+
+                            No attendance records found.
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+
+    document.querySelectorAll(".custom-select").forEach((select) => {
+
+        new TomSelect(select, {
+
+            controlInput: null,
+
+            create: false,
+
+            sortField: {
+                field: "text",
+                direction: "asc"
+            }
+
+        });
+
+    });
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,913 @@
+{% extends 'admin_dashboard/base.html' %}
+
+{% block title %}Leave Requests{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .leave-wrapper {
+        max-width: 1100px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .leave-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        overflow: hidden;
+    }
+
+    .page-header {
+        padding: 25px 28px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .page-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 5px;
+    }
+
+    .page-subtitle {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+
+    /* Tabs */
+
+    .filter-tabs {
+        display: flex;
+        gap: 25px;
+        padding: 18px 28px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .tab-item {
+        font-size: 14px;
+        font-weight: 600;
+        color: #64748b;
+        cursor: pointer;
+        padding-bottom: 12px;
+        position: relative;
+    }
+
+    .tab-item:hover {
+        color: #2563eb;
+    }
+
+    .tab-item.active {
+        color: #2563eb;
+    }
+
+    .tab-item.active::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: #2563eb;
+        border-radius: 2px;
+    }
+
+
+    /* Slider */
+
+    .request-slider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 25px;
+    }
+
+    .request-track-wrapper {
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .request-track {
+        display: flex;
+        transition: transform 0.35s ease;
+    }
+
+
+    /* Card */
+
+    .request-card {
+        flex: 0 0 calc(33.333% - 14px);
+        margin-right: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 18px;
+        background: #ffffff;
+        min-height: 240px;
+        box-sizing: border-box;
+    }
+
+    .request-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .request-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .request-type {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 4px;
+    }
+
+
+    /* Status */
+
+    .status {
+        display: inline-block;
+        padding: 5px 11px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .pending {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    .approved {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .rejected {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+
+    /* Dates */
+
+    .request-date {
+        display: flex;
+        gap: 25px;
+        margin-bottom: 18px;
+    }
+
+    .date-item span {
+        display: block;
+        font-size: 11px;
+        color: #94a3b8;
+        margin-bottom: 4px;
+    }
+
+    .date-item strong {
+        font-size: 13px;
+        color: #1e293b;
+    }
+
+
+    /* Reason */
+
+    .reason-title {
+        font-size: 11px;
+        color: #94a3b8;
+        margin-bottom: 5px;
+    }
+
+    .reason-text {
+        font-size: 13px;
+        color: #475569;
+        line-height: 1.5;
+
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+
+        min-height: 40px;
+    }
+
+
+    /* Buttons */
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        margin-top: 18px;
+    }
+
+    .action-btn {
+        flex: 1;
+        border: none;
+        border-radius: 7px;
+        padding: 9px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .approve-btn {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .approve-btn:hover {
+        background: #bbf7d0;
+    }
+
+    .reject-btn {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .reject-btn:hover {
+        background: #fecaca;
+    }
+
+
+    /* Slider Buttons */
+
+    .slider-btn {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        border-radius: 50%;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #475569;
+        cursor: pointer;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .slider-btn:hover {
+        color: #2563eb;
+        border-color: #2563eb;
+    }
+
+    .slider-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+    }
+
+
+    /* Dots */
+
+    .slider-dots {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        padding: 0 0 20px;
+    }
+
+    .slider-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #cbd5e1;
+        cursor: pointer;
+    }
+
+    .slider-dot.active {
+        background: #2563eb;
+        width: 18px;
+        border-radius: 5px;
+    }
+
+
+    /* Empty */
+
+    .empty-request {
+        text-align: center;
+        padding: 55px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-request i {
+        font-size: 30px;
+        margin-bottom: 10px;
+    }
+
+    .empty-request p {
+        margin: 0;
+        font-size: 14px;
+    }
+
+
+    /* Reviewed */
+
+    .reviewed-info {
+        margin-top: 15px;
+        font-size: 11px;
+        color: #94a3b8;
+    }
+
+</style>
+
+
+<div class="leave-wrapper">
+
+    <div class="leave-card">
+
+
+        <!-- Header -->
+
+        <div class="page-header">
+
+            <h1 class="page-title">
+                Leave Requests
+            </h1>
+
+            <div class="page-subtitle">
+                Manage student and teacher leave requests
+            </div>
+
+        </div>
+
+
+        <!-- Filter -->
+
+        <div class="filter-tabs">
+
+            <span
+                class="tab-item active"
+                onclick="filterRequests('all', this)"
+            >
+                All
+            </span>
+
+            <span
+                class="tab-item"
+                onclick="filterRequests('pending', this)"
+            >
+                Pending
+            </span>
+
+            <span
+                class="tab-item"
+                onclick="filterRequests('approved', this)"
+            >
+                Approved
+            </span>
+
+            <span
+                class="tab-item"
+                onclick="filterRequests('rejected', this)"
+            >
+                Rejected
+            </span>
+
+        </div>
+
+
+        {% if leave_requests %}
+
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+
+            <div class="request-slider">
+
+
+                <!-- Previous -->
+
+                <button
+                    type="button"
+                    class="slider-btn"
+                    id="prevBtn"
+                    onclick="moveSlide(-1)"
+                >
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+
+                <!-- Cards -->
+
+                <div class="request-track-wrapper">
+
+                    <div
+                        class="request-track"
+                        id="requestTrack"
+                    >
+
+
+                        {% for leave in leave_requests %}
+
+
+                        <div
+                            class="request-card"
+                            data-status="{{ leave.status|lower }}"
+                        >
+
+
+                            <!-- Student / Teacher -->
+
+                            <div class="request-header">
+
+                                <div>
+
+
+                                    {% if leave.requester.student %}
+
+                                        <div class="request-name">
+                                            {{ leave.requester.student.name }}
+                                        </div>
+
+                                        <div class="request-type">
+                                            Student -
+                                            {{ leave.requester.student.ID }}
+                                        </div>
+
+
+                                    {% elif leave.requester.teacher %}
+
+                                        <div class="request-name">
+                                            {{ leave.requester.teacher.name }}
+                                        </div>
+
+                                        <div class="request-type">
+                                            Teacher -
+                                            {{ leave.requester.teacher.TrID }}
+                                        </div>
+
+
+                                    {% else %}
+
+                                        <div class="request-name">
+                                            {{ leave.requester.username }}
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <!-- Status -->
+
+                                {% if leave.status == "PENDING" %}
+
+                                    <span class="status pending">
+                                        Pending
+                                    </span>
+
+                                {% elif leave.status == "APPROVED" %}
+
+                                    <span class="status approved">
+                                        Approved
+                                    </span>
+
+                                {% elif leave.status == "REJECTED" %}
+
+                                    <span class="status rejected">
+                                        Rejected
+                                    </span>
+
+                                {% endif %}
+
+
+                            </div>
+
+
+                            <!-- Dates -->
+
+                            <div class="request-date">
+
+                                <div class="date-item">
+
+                                    <span>
+                                        From
+                                    </span>
+
+                                    <strong>
+                                        {{ leave.start_date|date:"d-m-Y" }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="date-item">
+
+                                    <span>
+                                        To
+                                    </span>
+
+                                    <strong>
+                                        {{ leave.end_date|date:"d-m-Y" }}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Reason -->
+
+                            <div>
+
+                                <div class="reason-title">
+                                    Reason
+                                </div>
+
+                                <div class="reason-text">
+                                    {{ leave.reason }}
+                                </div>
+
+                            </div>
+
+
+                            <!-- Actions -->
+
+                            {% if leave.status == "PENDING" %}
+
+                            <div class="action-buttons">
+
+
+                                <button
+                                    type="submit"
+                                    name="action_approve"
+                                    value="{{ leave.id }}"
+                                    class="action-btn approve-btn"
+                                >
+                                    <i class="fa-solid fa-check"></i>
+                                    Approve
+                                </button>
+
+
+                                <button
+                                    type="submit"
+                                    name="action_reject"
+                                    value="{{ leave.id }}"
+                                    class="action-btn reject-btn"
+                                >
+                                    <i class="fa-solid fa-xmark"></i>
+                                    Reject
+                                </button>
+
+
+                            </div>
+
+                            {% else %}
+
+                            <div class="reviewed-info">
+
+                                Reviewed
+                                {% if leave.reviewed_at %}
+                                    {{ leave.reviewed_at|date:"d-m-Y H:i" }}
+                                {% endif %}
+
+                            </div>
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                        {% endfor %}
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- Next -->
+
+                <button
+                    type="button"
+                    class="slider-btn"
+                    id="nextBtn"
+                    onclick="moveSlide(1)"
+                >
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+        <div
+            class="slider-dots"
+            id="sliderDots"
+        ></div>
+
+
+        {% else %}
+
+
+        <div class="empty-request">
+
+            <i class="fa-regular fa-folder-open"></i>
+
+            <p>
+                No leave requests found.
+            </p>
+
+        </div>
+
+
+        {% endif %}
+
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let currentSlide = 0;
+
+    const cardsPerSlide = 3;
+
+
+    function getVisibleCards() {
+
+        return Array.from(
+            document.querySelectorAll(".request-card")
+        ).filter(card => {
+
+            return card.style.display !== "none";
+
+        });
+
+    }
+
+
+    function filterRequests(status, element) {
+
+        document
+            .querySelectorAll(".tab-item")
+            .forEach(tab => {
+
+                tab.classList.remove("active");
+
+            });
+
+
+        element.classList.add("active");
+
+
+        document
+            .querySelectorAll(".request-card")
+            .forEach(card => {
+
+                if (
+                    status === "all" ||
+                    card.dataset.status === status
+                ) {
+
+                    card.style.display = "";
+
+                } else {
+
+                    card.style.display = "none";
+
+                }
+
+            });
+
+
+        currentSlide = 0;
+
+        createDots();
+
+        updateSlider();
+
+    }
+
+
+    function createDots() {
+
+        const dots =
+            document.getElementById("sliderDots");
+
+        if (!dots) {
+            return;
+        }
+
+
+        const cards = getVisibleCards();
+
+
+        const totalSlides =
+            Math.ceil(
+                cards.length / cardsPerSlide
+            );
+
+
+        dots.innerHTML = "";
+
+
+        for (
+            let i = 0;
+            i < totalSlides;
+            i++
+        ) {
+
+            const dot =
+                document.createElement("span");
+
+
+            dot.className =
+                "slider-dot";
+
+
+            if (i === currentSlide) {
+
+                dot.classList.add("active");
+
+            }
+
+
+            dot.onclick = function () {
+
+                currentSlide = i;
+
+                updateSlider();
+
+            };
+
+
+            dots.appendChild(dot);
+
+        }
+
+    }
+
+
+    function updateSlider() {
+
+        const track =
+            document.getElementById(
+                "requestTrack"
+            );
+
+
+        if (!track) {
+            return;
+        }
+
+
+        const cards =
+            getVisibleCards();
+
+
+        const prevBtn =
+            document.getElementById(
+                "prevBtn"
+            );
+
+
+        const nextBtn =
+            document.getElementById(
+                "nextBtn"
+            );
+
+
+        if (!cards.length) {
+
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+
+            return;
+
+        }
+
+
+        const totalSlides =
+            Math.ceil(
+                cards.length / cardsPerSlide
+            );
+
+
+        if (
+            currentSlide >= totalSlides
+        ) {
+
+            currentSlide =
+                totalSlides - 1;
+
+        }
+
+
+        const cardWidth =
+            cards[0].offsetWidth +
+            parseFloat(
+                getComputedStyle(
+                    cards[0]
+                ).marginRight
+            );
+
+
+        track.style.transform =
+            `translateX(-${
+                currentSlide *
+                cardWidth *
+                cardsPerSlide
+            }px)`;
+
+
+        prevBtn.disabled =
+            currentSlide === 0;
+
+
+        nextBtn.disabled =
+            currentSlide >=
+            totalSlides - 1;
+
+
+        document
+            .querySelectorAll(".slider-dot")
+            .forEach((dot, index) => {
+
+                dot.classList.toggle(
+                    "active",
+                    index === currentSlide
+                );
+
+            });
+
+    }
+
+
+    function moveSlide(direction) {
+
+        const cards =
+            getVisibleCards();
+
+
+        if (!cards.length) {
+            return;
+        }
+
+
+        const totalSlides =
+            Math.ceil(
+                cards.length / cardsPerSlide
+            );
+
+
+        currentSlide += direction;
+
+
+        if (currentSlide < 0) {
+
+            currentSlide = 0;
+
+        }
+
+
+        if (
+            currentSlide >= totalSlides
+        ) {
+
+            currentSlide =
+                totalSlides - 1;
+
+        }
+
+
+        updateSlider();
+
+    }
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            createDots();
+
+            updateSlider();
+
+        }
+    );
+
+
+    window.addEventListener(
+        "resize",
+        updateSlider
+    );
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,594 @@
+
+{% extends "admin_dashboard/base.html" %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* ================================
+       SEARCH FORM
+    ================================= */
+
+    .form {
+        position: relative;
+    }
+
+    .form .searchicon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #888;
+        transition: opacity 0.2s ease;
+    }
+
+    .form-input::placeholder {
+        color: #999;
+        transition: opacity 0.2s ease;
+    }
+
+    .form .form-input {
+        padding: 6px 15px 6px 45px;
+        border-radius: 10px;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus + .searchicon {
+        opacity: 0;
+    }
+
+    .form-input:focus::placeholder {
+        opacity: 0;
+    }
+
+    .form-input:focus {
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+        padding-left: 18px;
+    }
+
+
+    /* ================================
+       TABLE
+    ================================= */
+
+    .teacher-table {
+        vertical-align: middle;
+    }
+
+    .teacher-table th {
+        white-space: nowrap;
+    }
+
+    .teacher-table td {
+        vertical-align: middle;
+    }
+
+
+    /* ================================
+       SUBJECT BADGE
+    ================================= */
+
+    .subject-badge {
+        display: inline-block;
+        margin: 2px;
+        padding: 5px 9px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+
+    /* ================================
+       ACTION BUTTON
+    ================================= */
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+</style>
+
+{% endblock %}
+
+
+
+{% block title %}
+
+Teachers
+
+{% endblock %}
+
+
+
+{% block content %}
+
+
+<!-- ==========================================
+     FILTER SECTION
+========================================== -->
+
+<form method="GET">
+
+    <div class="row g-4 mb-4">
+
+
+        <!-- SEARCH TEACHER ID -->
+
+        <div class="col-lg-4">
+
+            <div class="form">
+
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ q }}"
+                    class="form-control form-input"
+                    placeholder="Search Teacher ID..."
+                >
+
+                <i class="fa-solid fa-magnifying-glass searchicon"></i>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ALL SUBJECTS -->
+
+        <div class="col-lg-2">
+
+            <select
+                name="subject"
+                class="custom-select"
+                autocomplete="off"
+            >
+
+                <option value="All Subjects">
+                    All Subjects
+                </option>
+
+
+                {% for subject in subjects %}
+
+                    <option
+                        value="{{ subject.id }}"
+                        {% if selected_subject == subject.id|stringformat:"s" %}
+                            selected
+                        {% endif %}
+                    >
+
+                        {{ subject.code }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+
+        <!-- ALL DEPARTMENTS -->
+
+        <div class="col-lg-2">
+
+            <select
+                name="department"
+                class="custom-select"
+                autocomplete="off"
+            >
+
+                <option value="All Departments">
+                    All Departments
+                </option>
+
+
+                {% for department in departments %}
+
+                    <option
+                        value="{{ department.id }}"
+                        {% if selected_department == department.id|stringformat:"s" %}
+                            selected
+                        {% endif %}
+                    >
+
+                        {{ department.short_code }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+
+        <!-- SEARCH BUTTON -->
+
+        <div class="col-lg-2">
+
+            <button
+                type="submit"
+                class="btn btn-outline-primary w-100"
+            >
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                Search
+
+            </button>
+
+        </div>
+
+
+
+        <!-- ADD TEACHER -->
+
+        <div class="col-lg-2">
+
+            <a
+                href="{% url 'add_teacher' %}"
+                class="btn btn-primary w-100"
+            >
+
+                <i class="fa-solid fa-plus"></i>
+
+                Add Teacher
+
+            </a>
+
+        </div>
+
+
+    </div>
+
+</form>
+
+
+
+<!-- ==========================================
+     TEACHER TABLE
+========================================== -->
+
+<div class="card shadow-sm p-0 overflow-hidden">
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0 teacher-table">
+
+
+            <!-- TABLE HEADER -->
+
+            <thead class="table-secondary text-center">
+
+                <tr>
+
+                    <th>
+                        #
+                    </th>
+
+                    <th>
+                        Name
+                    </th>
+
+                    <th>
+                        Email
+                    </th>
+
+                    <th>
+                        Phone
+                    </th>
+
+                    <th>
+                        Subject
+                    </th>
+
+                    <th>
+                        ID
+                    </th>
+
+                    <th>
+                        Department
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+
+            <!-- TABLE BODY -->
+
+            <tbody class="text-center">
+
+
+                {% for tr in trs %}
+
+                <tr>
+
+
+                    <!-- NUMBER -->
+
+                    <td>
+
+                        {{ forloop.counter }}
+
+                    </td>
+
+
+
+                    <!-- NAME -->
+
+                    <td>
+
+                        {{ tr.name }}
+
+                    </td>
+
+
+
+                    <!-- EMAIL -->
+
+                    <td>
+
+                        {{ tr.email }}
+
+                    </td>
+
+
+
+                    <!-- PHONE -->
+
+                    <td>
+
+                        {{ tr.phone }}
+
+                    </td>
+
+
+
+                    <!-- SUBJECT -->
+
+                    <td>
+
+                        {% for subject in tr.subj.all %}
+
+                            <span
+                                class="badge bg-primary-subtle text-primary subject-badge"
+                            >
+
+                                {{ subject.code }}
+
+                            </span>
+
+                        {% empty %}
+
+                            <span class="text-muted">
+
+                                No Subject
+
+                            </span>
+
+                        {% endfor %}
+
+                    </td>
+
+
+
+                    <!-- TEACHER ID -->
+
+                    <td>
+
+                        {{ tr.TrID }}
+
+                    </td>
+
+
+
+                    <!-- DEPARTMENT -->
+
+                    <td>
+
+                        {% if tr.dept %}
+
+                            <span class="badge bg-info-subtle text-info">
+
+                                {{ tr.dept.short_code }}
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="text-muted">
+
+                                No Department
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        {% if tr.is_active %}
+
+                            <span class="badge bg-success">
+
+                                Active
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-danger">
+
+                                Inactive
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+
+                    <!-- ACTION -->
+
+                    <td>
+
+
+                        <!-- VIEW -->
+
+                        <a
+                            href="{% url 'teacher_detail' tr.TrID %}"
+                            class="btn btn-outline-info action-btn"
+                            title="View"
+                        >
+
+                            <i class="fa-regular fa-eye"></i>
+
+                        </a>
+
+
+
+                        <!-- EDIT -->
+
+                        <a
+                            href="{% url 'edit_teacher' tr.TrID %}"
+                            class="btn btn-outline-primary action-btn"
+                            title="Edit"
+                        >
+
+                            <i class="fa-regular fa-pen-to-square"></i>
+
+                        </a>
+
+
+
+                        <!-- DELETE -->
+
+                        <form
+                            method="POST"
+                            action="{% url 'teacher_delete' tr.TrID %}"
+                            style="display:inline;"
+                            onsubmit="return confirm('Are you sure you want to delete this teacher?');"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn btn-outline-danger action-btn"
+                                title="Delete"
+                            >
+
+                                <i class="fa-regular fa-trash-can"></i>
+
+                            </button>
+
+                        </form>
+
+
+                    </td>
+
+
+                </tr>
+
+
+                {% empty %}
+
+
+                <!-- NO DATA -->
+
+                <tr>
+
+                    <td
+                        colspan="9"
+                        class="text-center text-muted py-5"
+                    >
+
+                        <i class="fa-solid fa-user-slash fs-3 mb-2"></i>
+
+                        <div>
+
+                            No teachers found.
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+
+                {% endfor %}
+
+
+            </tbody>
+
+
+        </table>
+
+    </div>
+
+</div>
+
+
+
+{% endblock %}
+
+
+
+{% block scripts %}
+
+<script>
+
+    /*
+     * TomSelect
+     * For Subject and Department dropdowns
+     */
+
+    document
+        .querySelectorAll(".custom-select")
+        .forEach((selects) => {
+
+            new TomSelect(selects, {
+
+                controlInput: null,
+
+                create: false,
+
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                }
+
+            });
+
+        });
+
+</script>
+
+{% endblock %}

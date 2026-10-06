@@ -1,0 +1,310 @@
+{% extends 'student_dashboard/base.html' %}
+
+{% block title %}My Timetable{% endblock %}
+
+{% block content %}
+
+<style>
+.builder-wrapper {
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.breadcrumbs {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.breadcrumbs a {
+  color: #64748b;
+  text-decoration: none;
+}
+
+/* Section information */
+.section-info {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px 22px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  margin-bottom: 22px;
+}
+
+.section-label {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.section-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+/* Timetable card */
+.grid-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  overflow-x: auto;
+}
+
+.empty-hint {
+  color: #94a3b8;
+  font-size: 14px;
+  text-align: center;
+  padding: 40px 10px;
+}
+
+.grid-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.grid-table th {
+  text-align: center;
+  padding: 12px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  background-color: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.grid-table td {
+  padding: 8px;
+  border: 1px solid #f1f5f9;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.time-col {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
+  background-color: #f8fafc;
+}
+
+/* Empty timetable cell */
+.slot-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  border-radius: 8px;
+  border: 1.5px dashed #cbd5e1;
+  color: #cbd5e1;
+  font-size: 16px;
+}
+
+/* Filled timetable cell */
+.slot-filled {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 64px;
+  border-radius: 8px;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  padding: 6px 8px;
+}
+
+.slot-filled strong {
+  font-size: 13px;
+}
+
+.slot-filled span {
+  font-size: 11px;
+  color: #2563eb;
+}
+
+.slot-filled small {
+  font-size: 10px;
+  color: #64748b;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .builder-wrapper {
+    width: 100%;
+  }
+
+  .grid-card {
+    padding: 12px;
+  }
+
+  .section-info {
+    padding: 15px;
+  }
+}
+</style>
+
+
+<div class="builder-wrapper">
+
+  <!-- Page Header -->
+  <div class="page-header">
+
+    <h1 class="page-title">
+      My Timetable
+    </h1>
+
+    <div class="breadcrumbs">
+      <a href="{% url 'schedule_list' %}">
+        My section
+      </a>
+      &gt;
+
+      <span>
+        {{ selected_class }}
+      </span>
+    </div>
+
+  </div>
+
+
+  <!-- Student's Section -->
+  {% if selected_class %}
+
+  <div class="section-info">
+
+    <div class="section-label">
+      My Section
+    </div>
+
+    <div class="section-name">
+      {{ selected_class }}
+    </div>
+
+  </div>
+
+  {% endif %}
+
+
+  <!-- Timetable -->
+  <div class="grid-card">
+
+    {% if not selected_class %}
+
+      <p class="empty-hint">
+        You have not been assigned to a section yet.
+      </p>
+
+
+    {% elif not time_slots %}
+
+      <p class="empty-hint">
+        No time slots are available.
+      </p>
+
+
+    {% elif not grid %}
+
+      <p class="empty-hint">
+        No timetable is available for your section yet.
+      </p>
+
+
+    {% else %}
+
+      <table class="grid-table">
+
+        <thead>
+
+          <tr>
+
+            <th class="time-col">
+              Time
+            </th>
+
+            {% for cell in grid.0.cells %}
+
+              <th>
+                {{ cell.day_label }}
+              </th>
+
+            {% endfor %}
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          {% for row in grid %}
+
+            <tr>
+
+              <!-- Time -->
+              <td class="time-col">
+                {{ row.time_slot }}
+              </td>
+
+
+              <!-- Monday - Friday -->
+              {% for cell in row.cells %}
+
+                <td>
+
+                  {% if cell.entry %}
+
+                    <div class="slot-filled">
+
+                      <!-- Subject -->
+                      <strong>
+                        {{ cell.entry.subject.code }}
+                      </strong>
+
+                      <!-- Teacher -->
+                      <span>
+                        {{ cell.entry.teacher.full_name }}
+                      </span>
+
+                      <!-- Room -->
+
+
+                    </div>
+
+                  {% else %}
+
+                    <div class="slot-empty">
+                      —
+                    </div>
+
+                  {% endif %}
+
+                </td>
+
+              {% endfor %}
+
+            </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    {% endif %}
+
+  </div>
+
+</div>
+
+{% endblock %}

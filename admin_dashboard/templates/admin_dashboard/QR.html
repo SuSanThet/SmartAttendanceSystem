@@ -1,0 +1,250 @@
+
+{% extends "admin_dashboard/base.html" %}
+
+{% block extra_css %}
+<style>
+    .form {
+        position: relative;
+    }
+
+    .form .searchicon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #888;
+        transition: opacity 0.2s ease;
+    }
+
+    .form-input::placeholder {
+        color: #999;
+        transition: opacity 0.2s ease;
+    }
+
+    .form .form-input {
+        padding: 6px 15px 6px 45px;
+        border-radius: 10px;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus + .searchicon {
+        opacity: 0;
+    }
+
+    .form-input:focus::placeholder {
+        opacity: 0;
+    }
+
+    .form-input:focus {
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+        padding-left: 18px;
+    }
+</style>
+{% endblock %}
+
+
+{% block title %}
+QR Code
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+
+    <div class="card border-0 rounded-4 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form method="get">
+
+                <div class="row g-4">
+                    <!-- Search Input -->
+                    <div class="col-lg-8">
+                        <div class="form">
+                            <input type="text" name="ID" value="{{ request.GET.ID }}" class="form-control form-input" placeholder="Search QR code by Student ID">
+                            <i class="fa-solid fa-magnifying-glass searchicon"></i>
+                        </div>
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="col-lg-2">
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            Search
+                        </button>
+                    </div>
+
+                    <!-- Back Button -->
+                    <div class="col-lg-2">
+                        <a href="{% url 'admin_dashboard:student' %}" class="btn btn-outline-secondary w-100">
+                            ← Back
+                        </a>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!--  Result Area-->
+    <div class="row g-3">
+
+        <!--  Student Details -->
+        <div class="col-lg-6">
+            <div class="card border-0 rounded-4 shadow-sm">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="card-title fw-bold pd-2 mb-3 border-bottom">
+                            Student Details
+                        </h5>
+                        <ul class="list-group list-group-flush">
+
+                            <!-- Student ID -->
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-0 border-bottom border-light">
+                                <span class="text-secondary small">
+                                    Student ID
+                                </span>
+                                <span class="fw-semibold text-dark">
+                                    {% if student %}
+                                        {{ student.ID }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </span>
+                            </li>
+
+                            <!-- Name -->
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-0 border-bottom border-light">
+                                <span class="text-secondary small">
+                                     Name
+                                </span>
+                                <span class="fw-semibold text-dark">
+                                    {% if student %}
+                                        {{ student.name }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </span>
+                            </li>
+
+                            <!-- Major -->
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-0 border-bottom border-light">
+                                <span class="text-secondary small">
+                                    Major
+                                </span>
+                                <span class="fw-semibold text-dark">
+                                    {% if student %}
+                                        {{ student.major }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </span>
+                            </li>
+
+                            <!-- Phone -->
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-0 border-bottom border-light">
+                                <span class="text-secondary small">
+                                    Phone
+                                </span>
+                                <span class="fw-semibold text-dark">
+                                    {% if student %}
+                                        {{ student.phone }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </span>
+                            </li>
+
+                            <!-- Email -->
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-0">
+                                <span class="text-secondary small">
+                                    Email
+                                </span>
+                                <span class="fw-semibold text-dark">
+                                    {% if student %}
+                                        {{ student.email }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- QR DISPLAY -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+
+                    {% if not searched %}
+
+                    <div class="text-center text-secondary">
+                        <i class="bi bi-search fs-1 opacity-50 mb-2 d-block"></i>
+                        <p class="small mb-0">
+                            Enter a Student ID to view details and QR code
+                        </p>
+                    </div>
+
+                    {% elif not student %}
+
+                    <div class="text-center p-4 bg-danger-subtle border border-danger-subtle rounded-3 w-100">
+                        <i class="bi bi-x-circle-fill text-danger fs-3 mb-2 d-block"></i>
+                        <h6 class="fw-semibold text-danger-emphasis mb-1">
+                            Student Not Found
+                        </h6>
+                        <p class="small text-danger-emphasis mb-0">
+                            No record matching this ID exists in the system.
+                        </p>
+                    </div>
+
+                    {% elif student.qr_code %}
+
+                    <div class="text-center">
+
+                        <!-- QR Image -->
+                        <div class="p-3 bg-white border border-light-subtle rounded-4 shadow-sm d-inline-block mb-3">
+                            <img src="{{ student.qr_code.url }}" alt="QR Code" class="img-fluid" style="width: 170px; height: 170px;object-fit: contain;">
+                        </div>
+
+                        <!-- Active Status -->
+                        <div>
+                            <span class="badge text-success bg-success-subtle border border-success-subtle rounded-pill px-3 py-2">
+                                <i class="bi bi-check-circle-fill me-1"></i>
+                                Active QR Code
+                            </span>
+                        </div>
+
+                        <!-- Download Button -->
+                        <div class="mt-3">
+                            <a href="{{ student.qr_code.url }}" download class="btn btn-primary">
+                                <i class="bi bi-download me-1"></i>
+                                Download QR
+                            </a>
+                        </div>
+                    </div>
+
+                    {% else %}
+
+                    <div class="text-center p-4 bg-warning-subtle border border-warning-subtle rounded-3 w-100">
+                        <i class="bi bi-exclamation-triangle-fill text-warning fs-3 mb-2 d-block"></i>
+                        <h6 class="fw-semibold text-warning-emphasis mb-1">
+                            QR Code Not Found
+                        </h6>
+                        <p class="small text-warning-emphasis mb-0">
+                            No QR code generated for this student ID yet.
+                        </p>
+                    </div>
+
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+

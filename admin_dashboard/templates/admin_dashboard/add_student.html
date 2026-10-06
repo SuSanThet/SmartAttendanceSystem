@@ -1,0 +1,690 @@
+
+{% extends "admin_dashboard/base.html" %}
+
+{% block extra_css %}
+
+<style>
+
+    .icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .icon-blue-light {
+        background-color: #e8f1ff;
+        color: #0d6efd;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+    }
+
+    .form-label {
+        margin-bottom: 8px;
+    }
+
+    .avatar-preview {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        background-color: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        margin: 0 auto;
+    }
+
+    .avatar-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .photo-upload-box {
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        background-color: #f8fafc;
+    }
+
+    .form-control {
+        border-radius: 10px;
+    }
+
+    .form-control:focus {
+        border-color: #4f46e5 !important;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.2) !important;
+    }
+
+    .custom-select {
+        width: 100%;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 10px 12px;
+        background-color: #fff;
+    }
+
+    .custom-select:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+        outline: none;
+    }
+
+    .field-error {
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .non-field-error {
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block title %}
+Add Student
+{% endblock %}
+
+
+{% block content %}
+
+<!-- Breadcrumb -->
+
+<nav class="mb-4">
+
+    <ol class="breadcrumb">
+
+        <li class="breadcrumb-item">
+
+            <a
+                href="{% url 'admin_dashboard:student' %}"
+                class="text-decoration-none"
+            >
+                Students
+            </a>
+
+        </li>
+
+        <li class="breadcrumb-item">
+            Add Student
+        </li>
+
+    </ol>
+
+</nav>
+
+
+<!-- Form -->
+
+<form
+    method="POST"
+    enctype="multipart/form-data"
+    class="mt-4"
+>
+
+    {% csrf_token %}
+
+
+    <!-- Non field errors -->
+
+    {% if form.non_field_errors %}
+
+        <div class="non-field-error">
+
+            {% for error in form.non_field_errors %}
+
+                <div>
+                    {{ error }}
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+    <div class="row g-3">
+
+
+        <!-- ========================= -->
+        <!-- LEFT : PROFILE PHOTO -->
+        <!-- ========================= -->
+
+        <div class="col-lg-4">
+
+            <div class="photo-upload-box p-4 text-center">
+
+                <div class="avatar-preview mb-3">
+
+                    <i
+                        id="defaultIcon"
+                        class="fa-solid fa-user-plus text-secondary fs-1"
+                    ></i>
+
+                    <img
+                        id="previewImg"
+                        src=""
+                        alt="Preview"
+                        class="d-none"
+                    >
+
+                </div>
+
+
+                <label
+                    for="photoInput"
+                    class="btn btn-outline-secondary btn-sm mb-2"
+                >
+
+                    <i class="fa-solid fa-camera me-1"></i>
+
+                    Upload Photo
+
+                </label>
+
+
+                <input
+                    type="file"
+                    id="photoInput"
+                    class="d-none"
+                    name="profile_photo"
+                    accept="image/*"
+                >
+
+
+                <div
+                    class="form-text text-muted"
+                    style="font-size: 0.75rem;"
+                >
+                    JPG, PNG or GIF (Max 2MB)
+                </div>
+
+
+                <!-- Photo Error -->
+
+                {% if form.profile_photo.errors %}
+
+                    {% for error in form.profile_photo.errors %}
+
+                        <div class="field-error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- RIGHT : STUDENT INFORMATION -->
+        <!-- ========================= -->
+
+        <div class="col-lg-8">
+
+            <div class="row">
+
+
+                <!-- ================= -->
+                <!-- FULL NAME -->
+                <!-- ================= -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="fullName"
+                        class="form-label fw-semibold"
+                    >
+
+                        Full Name
+
+                        <span class="text-danger">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="fullName"
+                        class="form-control {% if form.name.errors %}is-invalid{% endif %}"
+                        name="name"
+                        placeholder="Enter Full Name"
+                        value="{{ form.name.value|default:'' }}"
+                        required
+                    >
+
+
+                    {% for error in form.name.errors %}
+
+                        <div class="field-error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- ================= -->
+                <!-- STUDENT ID -->
+                <!-- ================= -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="rollNumber"
+                        class="form-label fw-semibold"
+                    >
+
+                        Roll Number
+
+                        <span class="text-danger">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="rollNumber"
+                        class="form-control {% if form.ID.errors %}is-invalid{% endif %}"
+                        name="ID"
+                        placeholder="Enter roll number, e.g. ST001"
+                        value="{{ form.ID.value|default:'' }}"
+                        required
+                    >
+
+
+                    {% for error in form.ID.errors %}
+
+                        <div class="field-error">
+
+                            {{ error }}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- ================= -->
+                <!-- SECTION -->
+                <!-- ================= -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="selectSection"
+                        class="form-label fw-semibold"
+                    >
+
+                        Section
+
+                        <span class="text-danger">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <select
+                        id="selectSection"
+                        class="custom-select {% if form.section.errors %}is-invalid{% endif %}"
+                        name="section"
+                        data-placeholder="Select Section"
+                        required
+                    >
+
+                        <option value="">
+                            Select Section
+                        </option>
+
+
+                        {% for section in sections %}
+
+                            <option
+                                value="{{ section.id }}"
+                                {% if form.section.value|stringformat:"s" == section.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+
+                                {{ section.sem }}
+                                {{ section.name }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+
+                    {% for error in form.section.errors %}
+
+                        <div class="field-error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- ================= -->
+                <!-- MAJOR -->
+                <!-- ================= -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="selectMajor"
+                        class="form-label fw-semibold"
+                    >
+
+                        Major
+
+                        <span class="text-danger">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <select
+                        id="selectMajor"
+                        class="custom-select {% if form.major.errors %}is-invalid{% endif %}"
+                        name="major"
+                        data-placeholder="Select Major"
+                        required
+                    >
+
+                        <option value="">
+                            Select Major
+                        </option>
+
+
+                        {% for major in majors %}
+
+                            <option
+                                value="{{ major.id }}"
+                                {% if form.major.value|stringformat:"s" == major.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+
+                                {{ major.name }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+
+                    {% for error in form.major.errors %}
+
+                        <div class="field-error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- ================= -->
+                <!-- EMAIL -->
+                <!-- ================= -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="email"
+                        class="form-label fw-semibold"
+                    >
+
+                        Email
+
+                        <span class="text-danger">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        type="email"
+                        id="email"
+                        class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                        name="email"
+                        placeholder="Enter email"
+                        value="{{ form.email.value|default:'' }}"
+                        required
+                    >
+
+
+                    {% for error in form.email.errors %}
+
+                        <div class="field-error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- ================= -->
+                <!-- PHONE -->
+                <!-- ================= -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="phone"
+                        class="form-label fw-semibold"
+                    >
+
+                        Phone Number
+
+                        <span class="text-danger">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        type="tel"
+                        class="form-control {% if form.phone.errors %}is-invalid{% endif %}"
+                        id="phone"
+                        name="phone"
+                        placeholder="Enter phone number"
+                        value="{{ form.phone.value|default:'' }}"
+                        required
+                    >
+
+
+                    {% for error in form.phone.errors %}
+
+                        <div class="field-error">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- BUTTONS -->
+    <!-- ========================= -->
+
+    <div class="d-flex justify-content-end mt-4">
+
+        <a
+            href="{% url 'admin_dashboard:student' %}"
+            class="btn btn-outline-danger me-2"
+        >
+
+            Cancel
+
+        </a>
+
+
+        <button
+            type="submit"
+            class="btn btn-outline-primary"
+        >
+
+            <i class="fa-solid fa-floppy-disk me-1"></i>
+
+            Save Student
+
+        </button>
+
+    </div>
+
+</form>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+
+
+// ===============================
+// PHOTO PREVIEW
+// ===============================
+
+const photoInput =
+    document.getElementById("photoInput");
+
+const previewImg =
+    document.getElementById("previewImg");
+
+const defaultIcon =
+    document.getElementById("defaultIcon");
+
+
+if (photoInput) {
+
+    photoInput.addEventListener(
+        "change",
+        function(e) {
+
+            const file =
+                e.target.files[0];
+
+            if (file) {
+
+                const reader =
+                    new FileReader();
+
+                reader.onload =
+                    function(event) {
+
+                        previewImg.src =
+                            event.target.result;
+
+                        previewImg.classList.remove(
+                            "d-none"
+                        );
+
+                        defaultIcon.classList.add(
+                            "d-none"
+                        );
+
+                    };
+
+                reader.readAsDataURL(file);
+
+            }
+
+        }
+    );
+
+}
+
+
+// ===============================
+// TOM SELECT
+// ===============================
+
+document
+    .querySelectorAll(".custom-select")
+    .forEach(function(select) {
+
+        if (typeof TomSelect !== "undefined") {
+
+            new TomSelect(
+                select,
+                {
+
+                    controlInput: null,
+
+                    placeholder:
+                        select.dataset.placeholder,
+
+                    create: false,
+
+                    sortField: {
+                        field: "text",
+                        direction: "asc"
+                    },
+
+                    onInitialize: function() {
+
+                        if (this.control_input) {
+
+                            this.control_input.setAttribute(
+                                "readonly",
+                                true
+                            );
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+    });
+
+</script>
+
+{% endblock %}
+

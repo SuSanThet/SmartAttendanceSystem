@@ -1,0 +1,1003 @@
+{% extends "admin_dashboard/base.html" %}
+
+{% block title %}My Mail{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+.mail-page {
+    padding: 10px 0;
+}
+
+.mail-layout {
+    display: flex;
+    gap: 20px;
+    min-height: 650px;
+}
+
+/* Sidebar */
+
+.mail-sidebar {
+    width: 220px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px 15px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+    flex-shrink: 0;
+}
+
+.compose-btn {
+    width: 100%;
+    border: none;
+    background: #0d6efd;
+    color: white;
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.compose-btn:hover {
+    background: #0b5ed7;
+}
+
+.mail-folder {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 13px;
+    margin-bottom: 5px;
+    border-radius: 9px;
+    color: #475569;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.mail-folder:hover {
+    background: #f1f5f9;
+    color: #0d6efd;
+}
+
+.mail-folder.active {
+    background: #e8f1ff;
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+.mail-folder i {
+    font-size: 18px;
+}
+
+/* Content */
+
+.mail-content {
+    flex: 1;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.mail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.mail-title {
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Search */
+
+.search-wrapper {
+    width: 300px;
+    position: relative;
+}
+
+.search-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.mail-search {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 15px 10px 40px;
+    outline: none;
+    font-size: 14px;
+}
+
+.mail-search:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13,110,253,0.1);
+}
+
+/* Mail Item */
+
+.mail-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 17px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.mail-item:hover {
+    background: #f8fafc;
+}
+
+.mail-item.unread {
+    background: #f8fbff;
+}
+
+.mail-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #e8f1ff;
+    color: #0d6efd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.mail-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.mail-sender {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.mail-email {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.mail-subject {
+    margin-top: 3px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mail-preview {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.mail-time {
+    font-size: 11px;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    background: #0d6efd;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Empty */
+
+.empty-mail {
+    text-align: center;
+    padding: 100px 20px;
+    color: #94a3b8;
+}
+
+.empty-mail i {
+    font-size: 45px;
+    margin-bottom: 15px;
+}
+
+/* No Search Result */
+
+.no-search-result {
+    text-align: center;
+    padding: 80px 20px;
+    color: #94a3b8;
+}
+
+.no-search-result i {
+    font-size: 40px;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+
+    .mail-layout {
+        flex-direction: column;
+    }
+
+    .mail-sidebar {
+        width: 100%;
+    }
+
+    .search-wrapper {
+        width: 200px;
+    }
+
+    .mail-header {
+        gap: 15px;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="mail-page">
+
+    <div class="mail-layout">
+
+        <!-- ========================= -->
+        <!-- MAIL SIDEBAR -->
+        <!-- ========================= -->
+
+            <i class="fa-solid fa-arrow-left-long"></i>
+        <div class="mail-sidebar">
+
+            <!-- Compose -->
+
+            <button
+                type="button"
+                class="compose-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#composeModal">
+
+                <i class="bi bi-pencil-square me-2"></i>
+                Compose
+
+            </button>
+
+
+            <!-- Inbox -->
+
+            <a
+                href="#"
+                class="mail-folder active"
+                data-folder="inbox">
+
+                <i class="bi bi-inbox"></i>
+
+                <span>Inbox</span>
+
+            </a>
+
+
+            <!-- Sent -->
+
+            <a
+                href="#"
+                class="mail-folder"
+                data-folder="sent">
+
+                <i class="bi bi-send"></i>
+
+                <span>Sent</span>
+
+            </a>
+
+
+            <!-- Trash -->
+
+            <a
+                href="#"
+                class="mail-folder"
+                data-folder="trash">
+
+                <i class="bi bi-trash"></i>
+
+                <span>Trash</span>
+
+            </a>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- MAIL CONTENT -->
+        <!-- ========================= -->
+
+        <div class="mail-content">
+
+            <!-- ========================= -->
+            <!-- INBOX -->
+            <!-- ========================= -->
+
+            <div
+                class="mail-folder-content"
+                id="inboxContent"
+                data-folder-content="inbox">
+
+                <div class="mail-header">
+
+                    <h4 class="mail-title">
+                        Inbox
+                    </h4>
+
+                    <div class="search-wrapper">
+
+                        <i class="bi bi-search"></i>
+
+                        <input
+                            type="text"
+                            class="mail-search"
+                            data-search-folder="inbox"
+                            placeholder="Search mail..."
+                            autocomplete="off">
+
+                    </div>
+
+                </div>
+
+
+                {% for mail in inbox %}
+
+                <div
+                    class="mail-item {% if not mail.is_read %}unread{% endif %}"
+                    data-search="
+                        {{ mail.sender.username|lower }}
+                        {{ mail.sender.email|lower }}
+                        {{ mail.subject|lower }}
+                        {{ mail.message|lower }}
+                    "
+                    data-mail-id="{{ mail.id }}"
+                    data-mail-folder="inbox"
+                    onclick="openMail({{ mail.id }})"
+                >
+
+                    <div class="mail-avatar">
+
+                        {{ mail.sender.username|first|upper }}
+
+                    </div>
+
+
+                    <div class="mail-info">
+
+                        <div class="mail-sender">
+
+                            {{ mail.sender.username }}
+
+                        </div>
+
+                        <div class="mail-email">
+
+                            {{ mail.sender.email }}
+
+                        </div>
+
+                        <div class="mail-subject">
+
+                            {{ mail.subject }}
+
+                            <span class="mail-preview">
+
+                                — {{ mail.message|truncatechars:70 }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    {% if not mail.is_read %}
+
+                    <div class="unread-dot"></div>
+
+                    {% endif %}
+
+
+                    <div class="mail-time">
+
+                        {{ mail.created_at|date:"g:i A" }}
+
+                    </div>
+
+                </div>
+
+                {% empty %}
+
+                <div class="empty-mail">
+
+                    <i class="bi bi-envelope-open"></i>
+
+                    <p>No emails in Inbox</p>
+
+                </div>
+
+                {% endfor %}
+
+
+                <div
+                    class="no-search-result d-none"
+                    data-no-result="inbox">
+
+                    <i class="bi bi-search"></i>
+
+                    <p class="mt-2 mb-0">
+                        No emails found
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================= -->
+            <!-- SENT -->
+            <!-- ========================= -->
+
+            <div
+                class="mail-folder-content d-none"
+                id="sentContent"
+                data-folder-content="sent">
+
+                <div class="mail-header">
+
+                    <h4 class="mail-title">
+                        Sent
+                    </h4>
+
+                    <div class="search-wrapper">
+
+                        <i class="bi bi-search"></i>
+
+                        <input
+                            type="text"
+                            class="mail-search"
+                            data-search-folder="sent"
+                            placeholder="Search mail..."
+                            autocomplete="off">
+
+                    </div>
+
+                </div>
+
+
+                {% for mail in sent %}
+
+                <div
+                    class="mail-item"
+                    data-search="
+                        {{ mail.receiver.username|lower }}
+                        {{ mail.receiver.email|lower }}
+                        {{ mail.subject|lower }}
+                        {{ mail.message|lower }}
+                    "
+                    data-mail-id="{{ mail.id }}"
+                    data-mail-folder="sent"
+                    onclick="openMail({{ mail.id }})"
+                >
+
+                    <div class="mail-avatar">
+
+                        {{ mail.receiver.username|first|upper }}
+
+                    </div>
+
+
+                    <div class="mail-info">
+
+                        <div class="mail-sender">
+
+                            To: {{ mail.receiver.email }}
+
+                        </div>
+
+                        <div class="mail-subject">
+
+                            {{ mail.subject }}
+
+                            <span class="mail-preview">
+
+                                — {{ mail.message|truncatechars:70 }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mail-time">
+
+                        {{ mail.created_at|date:"g:i A" }}
+
+                    </div>
+
+                </div>
+
+                {% empty %}
+
+                <div class="empty-mail">
+
+                    <i class="bi bi-send"></i>
+
+                    <p>No sent emails</p>
+
+                </div>
+
+                {% endfor %}
+
+
+                <div
+                    class="no-search-result d-none"
+                    data-no-result="sent">
+
+                    <i class="bi bi-search"></i>
+
+                    <p class="mt-2 mb-0">
+                        No emails found
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================= -->
+            <!-- TRASH -->
+            <!-- ========================= -->
+
+            <div
+                class="mail-folder-content d-none"
+                id="trashContent"
+                data-folder-content="trash">
+
+                <div class="mail-header">
+
+                    <h4 class="mail-title">
+                        Trash
+                    </h4>
+
+                    <div class="search-wrapper">
+
+                        <i class="bi bi-search"></i>
+
+                        <input
+                            type="text"
+                            class="mail-search"
+                            data-search-folder="trash"
+                            placeholder="Search mail..."
+                            autocomplete="off">
+
+                    </div>
+
+                </div>
+
+
+                {% for mail in trash %}
+
+                <div
+                    class="mail-item"
+                    data-search="
+                        {{ mail.sender.username|lower }}
+                        {{ mail.sender.email|lower }}
+                        {{ mail.receiver.username|lower }}
+                        {{ mail.receiver.email|lower }}
+                        {{ mail.subject|lower }}
+                        {{ mail.message|lower }}
+                    "
+                    data-mail-id="{{ mail.id }}"
+                    data-mail-folder="trash"
+                    onclick="openMail({{ mail.id }})"
+                >
+
+                    <div class="mail-avatar">
+
+                        {% if mail.sender == request.user %}
+
+                            {{ mail.receiver.username|first|upper }}
+
+                        {% else %}
+
+                            {{ mail.sender.username|first|upper }}
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="mail-info">
+
+                        <div class="mail-sender">
+
+                            {% if mail.sender == request.user %}
+
+                                To: {{ mail.receiver.email }}
+
+                            {% else %}
+
+                                From: {{ mail.sender.email }}
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="mail-subject">
+
+                            {{ mail.subject }}
+
+                            <span class="mail-preview">
+
+                                — {{ mail.message|truncatechars:70 }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mail-time">
+
+                        {{ mail.created_at|date:"g:i A" }}
+
+                    </div>
+                <a href="{% url 'emails:admin_delete_email' mail.id %}"
+                   class="btn btn-sm btn-light text-danger" onclick="event.stopPropagation();">
+                   <i class="bi bi-trash"></i>
+
+                </a>
+                </div>
+
+                {% empty %}
+
+                <div class="empty-mail">
+
+                    <i class="bi bi-trash"></i>
+
+                    <p>Trash is empty</p>
+
+                </div>
+
+                {% endfor %}
+
+
+                <div
+                    class="no-search-result d-none"
+                    data-no-result="trash">
+
+                    <i class="bi bi-search"></i>
+
+                    <p class="mt-2 mb-0">
+                        No emails found
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- COMPOSE MODAL -->
+<!-- ========================= -->
+
+<div
+    class="modal fade"
+    id="composeModal"
+    tabindex="-1"
+    aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    <i class="bi bi-pencil-square me-2"></i>
+
+                    New Message
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <form method="post" action="{% url 'emails:admin_send_email' %}">
+
+                {% csrf_token %}
+
+                <div class="modal-body">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            To
+                        </label>
+
+                        <select
+                            name="receiver"
+                            class="form-select"
+                            required>
+
+                            <option value="">
+                                Select recipient
+                            </option>
+
+                            {% for user in users %}
+
+                            {% if user.email %}
+
+                            <option value="{{ user.id }}">
+
+                                {{ user.email }}
+
+                            </option>
+
+                            {% endif %}
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Subject
+                        </label>
+
+                        <input
+                            type="text"
+                            name="subject"
+                            class="form-control"
+                            maxlength="255"
+                            required>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Message
+                        </label>
+
+                        <textarea
+                            name="message"
+                            class="form-control"
+                            rows="8"
+                            required></textarea>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary">
+
+                        <i class="bi bi-send me-1"></i>
+
+                        Send
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ================================= */
+/* FOLDER SWITCHING */
+/* ================================= */
+
+const folderButtons =
+    document.querySelectorAll(".mail-folder");
+
+const folderContents =
+    document.querySelectorAll(".mail-folder-content");
+
+
+folderButtons.forEach(function(button) {
+
+    button.addEventListener("click", function(event) {
+
+        event.preventDefault();
+
+        const folder =
+            this.dataset.folder;
+
+        folderButtons.forEach(function(item) {
+
+            item.classList.remove("active");
+
+        });
+
+        this.classList.add("active");
+
+
+        folderContents.forEach(function(content) {
+
+            content.classList.add("d-none");
+
+        });
+
+
+        const selectedContent =
+            document.querySelector(
+                `[data-folder-content="${folder}"]`
+            );
+
+        if (selectedContent) {
+
+            selectedContent.classList.remove("d-none");
+
+        }
+
+    });
+
+});
+
+
+/* ================================= */
+/* LIVE SEARCH */
+/* ================================= */
+
+const searchInputs =
+    document.querySelectorAll(".mail-search");
+
+
+searchInputs.forEach(function(searchInput) {
+
+    searchInput.addEventListener("input", function() {
+
+        const keyword =
+            this.value.toLowerCase().trim();
+
+        const folder =
+            this.dataset.searchFolder;
+
+        const content =
+            document.querySelector(
+                `[data-folder-content="${folder}"]`
+            );
+
+        if (!content) {
+            return;
+        }
+
+
+        const mailItems =
+            content.querySelectorAll(".mail-item");
+
+        const noResult =
+            content.querySelector(
+                `[data-no-result="${folder}"]`
+            );
+
+
+        let found = 0;
+
+
+        mailItems.forEach(function(mail) {
+
+            const text =
+                mail.dataset.search.toLowerCase();
+
+            if (
+                keyword === "" ||
+                text.includes(keyword)
+            ) {
+
+                mail.classList.remove("d-none");
+
+                mail.style.display = "";
+
+                found++;
+
+            } else {
+
+                mail.classList.add("d-none");
+
+                mail.style.display = "none";
+
+            }
+
+        });
+
+
+        if (noResult) {
+
+            if (
+                keyword !== "" &&
+                found === 0
+            ) {
+
+                noResult.classList.remove("d-none");
+
+            } else {
+
+                noResult.classList.add("d-none");
+
+            }
+
+        }
+
+    });
+
+});
+
+
+/* ================================= */
+/* OPEN MAIL */
+/* ================================= */
+
+function openMail(mailId) {
+    window.location.href =
+        "{% url 'emails:admin_email_detail' 0 %}"
+        .replace("/0/", "/" + mailId + "/");
+}
+
+</script>
+
+{% endblock %}

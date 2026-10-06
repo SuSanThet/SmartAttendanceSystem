@@ -1,0 +1,30 @@
+{% extends 'admin_dashboard/base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h3>Assign Section</h3>
+
+    <p>
+        Student:
+        <strong>{{ student.name }}</strong>
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            {{ form.section.label_tag }}
+            {{ form.section }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Assign Section
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

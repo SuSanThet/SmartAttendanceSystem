@@ -1,0 +1,1128 @@
+
+{% extends 'admin_dashboard/base.html' %}
+
+{% block content %}
+
+<style>
+    .report-page {
+        padding: 25px;
+    }
+
+    .report-header {
+        margin-bottom: 25px;
+    }
+
+    .report-title {
+        font-size: 25px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 5px;
+    }
+
+    .report-subtitle {
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    /* Summary Cards */
+    .summary-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 22px;
+        border: 1px solid #eef0f4;
+        height: 100%;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .summary-card-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .summary-label {
+        color: #6b7280;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .summary-value {
+        color: #111827;
+        font-size: 27px;
+        font-weight: 700;
+    }
+
+    .summary-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .icon-blue {
+        background: #e8f0ff;
+        color: #315efb;
+    }
+
+    .icon-green {
+        background: #e8f8ef;
+        color: #16a34a;
+    }
+
+    .icon-red {
+        background: #feecec;
+        color: #dc2626;
+    }
+
+    .icon-purple {
+        background: #f1eafe;
+        color: #7c3aed;
+    }
+
+    /* Report Card */
+    .report-card {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #eef0f4;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+        margin-bottom: 25px;
+        overflow: hidden;
+    }
+
+    .report-card-header {
+        padding: 18px 22px;
+        border-bottom: 1px solid #eef0f4;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .report-card-title {
+        font-size: 17px;
+        font-weight: 650;
+        color: #1f2937;
+        margin: 0;
+    }
+
+    .report-card-subtitle {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-top: 3px;
+    }
+
+    .report-card-body {
+        padding: 0;
+    }
+
+    /* Filters */
+    .filter-area {
+        padding: 18px 22px;
+        border-bottom: 1px solid #eef0f4;
+        background: #fafbfc;
+    }
+
+    .filter-input,
+    .filter-select {
+        height: 40px;
+        border: 1px solid #dfe3e8;
+        border-radius: 8px;
+        padding: 0 12px;
+        font-size: 13px;
+        background: #fff;
+        width: 100%;
+        outline: none;
+    }
+
+    .filter-input:focus,
+    .filter-select:focus {
+        border-color: #315efb;
+        box-shadow: 0 0 0 3px rgba(49, 94, 251, 0.08);
+    }
+
+    .filter-btn {
+        height: 40px;
+        border: none;
+        border-radius: 8px;
+        padding: 0 18px;
+        background: #315efb;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .filter-btn:hover {
+        background: #244edb;
+    }
+
+    /* Tables */
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .report-table th {
+        background: #fafbfc;
+        color: #6b7280;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 13px 20px;
+        text-align: left;
+        border-bottom: 1px solid #eef0f4;
+        white-space: nowrap;
+    }
+
+    .report-table td {
+        padding: 15px 20px;
+        font-size: 13px;
+        color: #374151;
+        border-bottom: 1px solid #f1f3f5;
+        vertical-align: middle;
+    }
+
+    .report-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .report-table tbody tr:hover {
+        background: #fafbfc;
+    }
+
+    /* Student */
+    .student-info {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+    }
+
+    .student-avatar {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        border-radius: 50%;
+        background: #e8f0ff;
+        color: #315efb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .student-name {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .student-id {
+        color: #9ca3af;
+        font-size: 11px;
+        margin-top: 2px;
+    }
+
+    /* Attendance */
+    .attendance-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 150px;
+    }
+
+    .progress {
+        height: 7px;
+        width: 90px;
+        background: #edf0f3;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        border-radius: 20px;
+    }
+
+    .progress-good {
+        background: #22c55e;
+    }
+
+    .progress-warning {
+        background: #f59e0b;
+    }
+
+    .progress-danger {
+        background: #ef4444;
+    }
+
+    .attendance-value {
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .text-good {
+        color: #16a34a;
+    }
+
+    .text-warning {
+        color: #d97706;
+    }
+
+    .text-danger {
+        color: #dc2626;
+    }
+
+    /* Status */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .status-good {
+        background: #eaf8ef;
+        color: #15803d;
+    }
+
+    .status-warning {
+        background: #fff7df;
+        color: #b45309;
+    }
+
+    .status-low {
+        background: #feecec;
+        color: #b91c1c;
+    }
+
+    /* Buttons */
+    .view-btn {
+        border: none;
+        background: #f1f4f8;
+        color: #315efb;
+        border-radius: 7px;
+        padding: 7px 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    .view-btn:hover {
+        background: #e8f0ff;
+        color: #315efb;
+    }
+
+    /* Alert */
+    .low-alert {
+        padding: 14px 20px;
+        background: #fff8f8;
+        border-bottom: 1px solid #fde7e7;
+        color: #991b1b;
+        font-size: 12px;
+    }
+
+    .low-alert i {
+        margin-right: 6px;
+    }
+
+    /* Empty */
+    .empty-state {
+        padding: 35px !important;
+        text-align: center !important;
+        color: #9ca3af !important;
+        font-size: 13px !important;
+    }
+
+    /* Month */
+    .month-label {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 8px;
+    }
+
+    @media (max-width: 768px) {
+
+        .report-page {
+            padding: 15px;
+        }
+
+        .report-table {
+            min-width: 750px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .report-card-header {
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .attendance-wrapper {
+            min-width: 130px;
+        }
+    }
+</style>
+
+
+<!-- Bootstrap Icons -->
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+>
+
+
+<div class="report-page">
+
+    <!-- Header -->
+    <div class="report-header">
+
+        <div class="report-title">
+            Attendance Reports
+        </div>
+
+        <div class="report-subtitle">
+            Monitor overall student and section attendance performance
+        </div>
+
+    </div>
+
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+
+        <!-- Total Students -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="summary-card">
+
+                <div class="summary-card-content">
+
+                    <div>
+
+                        <div class="summary-label">
+                            Total Students
+                        </div>
+
+                        <div class="summary-value">
+                            {{ total_students }}
+                        </div>
+
+                    </div>
+
+                    <div class="summary-icon icon-blue">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Overall Attendance -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="summary-card">
+
+                <div class="summary-card-content">
+
+                    <div>
+
+                        <div class="summary-label">
+                            Overall Attendance
+                        </div>
+
+                        <div class="summary-value">
+                            {{ overall_attendance }}%
+                        </div>
+
+                    </div>
+
+                    <div class="summary-icon icon-green">
+                        <i class="bi bi-bar-chart-fill"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Below 75 -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="summary-card">
+
+                <div class="summary-card-content">
+
+                    <div>
+
+                        <div class="summary-label">
+                            Below 75%
+                        </div>
+
+                        <div class="summary-value text-danger">
+                            {{ below_75_count }}
+                        </div>
+
+                    </div>
+
+                    <div class="summary-icon icon-red">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Sections -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="summary-card">
+
+                <div class="summary-card-content">
+
+                    <div>
+
+                        <div class="summary-label">
+                            Total Sections
+                        </div>
+
+                        <div class="summary-value">
+                            {{ total_sections }}
+                        </div>
+
+                    </div>
+
+                    <div class="summary-icon icon-purple">
+                        <i class="bi bi-grid-fill"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Section Attendance -->
+    <div class="report-card">
+
+        <div class="report-card-header">
+
+            <div>
+
+                <div class="report-card-title">
+                    Section Attendance Overview
+                </div>
+
+                <div class="report-card-subtitle">
+                    Overall attendance performance by section
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="report-card-body table-responsive">
+
+            <table class="report-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Section</th>
+                        <th>Students</th>
+                        <th>Expected</th>
+                        <th>Attended</th>
+                        <th>Overall Attendance</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for item in section_reports %}
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                {{ item.section }}
+                            </strong>
+                        </td>
+
+
+                        <td>
+                            {{ item.students }}
+                        </td>
+
+
+                        <td>
+                            {{ item.expected }}
+                        </td>
+
+
+                        <td>
+                            {{ item.attended }}
+                        </td>
+
+
+                        <td>
+
+                            <div class="attendance-wrapper">
+
+                                <div class="progress">
+
+                                    <div
+                                        class="progress-bar
+                                        {% if item.percentage >= 75 %}
+                                            progress-good
+                                        {% elif item.percentage >= 60 %}
+                                            progress-warning
+                                        {% else %}
+                                            progress-danger
+                                        {% endif %}"
+                                        style="width: {{ item.percentage }}%;">
+                                    </div>
+
+                                </div>
+
+
+                                <span
+                                    class="attendance-value
+                                    {% if item.percentage >= 75 %}
+                                        text-good
+                                    {% elif item.percentage >= 60 %}
+                                        text-warning
+                                    {% else %}
+                                        text-danger
+                                    {% endif %}">
+
+                                    {{ item.percentage }}%
+
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            {% if item.status == 'Good' %}
+
+                                <span class="status-badge status-good">
+                                    Good
+                                </span>
+
+                            {% elif item.status == 'Warning' %}
+
+                                <span class="status-badge status-warning">
+                                    Warning
+                                </span>
+
+                            {% else %}
+
+                                <span class="status-badge status-low">
+                                    Low
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="6" class="empty-state">
+                            No section attendance data available.
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- Below 75% -->
+    <div class="report-card">
+
+    <div class="report-card-header">
+
+        <div>
+            <div class="report-card-title">
+                Students Below 75%
+            </div>
+
+            <div class="report-card-subtitle">
+                Students who are currently below the minimum attendance requirement
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="low-alert">
+
+        <i class="bi bi-exclamation-circle-fill"></i>
+
+        These students may require attendance monitoring.
+
+    </div>
+
+
+    <div class="report-card-body table-responsive">
+
+        <table class="report-table">
+
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Section</th>
+                    <th>Expected</th>
+                    <th>Attended</th>
+                    <th>Attendance</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+
+            <tbody>
+
+                {% for item in below_75 %}
+
+                <tr>
+
+                    <!-- Student -->
+                    <td class="student-cell">
+
+                        <div class="student-name">
+                            {{ item.student.name }}
+                        </div>
+
+                        <div class="student-id">
+                            {{ item.student.ID }}
+                        </div>
+
+                    </td>
+
+
+                    <!-- Section -->
+                    <td class="section-cell">
+
+                        {{ item.section }}
+
+                    </td>
+
+
+                    <!-- Expected -->
+                    <td class="number-cell">
+
+                        {{ item.expected }}
+
+                    </td>
+
+
+                    <!-- Attended -->
+                    <td class="number-cell">
+
+                        {{ item.attended }}
+
+                    </td>
+
+
+                    <!-- Attendance -->
+                    <td class="attendance-cell">
+
+                        <div class="attendance-wrapper">
+
+                            <div class="progress">
+
+                                <div
+                                    class="progress-bar progress-danger"
+                                    style="width: {{ item.percentage }}%;">
+                                </div>
+
+                            </div>
+
+                            <span class="attendance-value text-danger">
+                                {{ item.percentage }}%
+                            </span>
+
+                        </div>
+
+                    </td>
+
+
+                    <!-- Status -->
+                    <td>
+
+                        <span class="status-badge status-low">
+                            Low
+                        </span>
+
+                    </td>
+
+                </tr>
+
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="6" class="empty-state">
+                        No students are below 75%.
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+    <!-- All Students -->
+    <div class="report-card">
+
+        <div class="report-card-header">
+
+            <div>
+
+                <div class="report-card-title">
+                    Student Attendance
+                </div>
+
+                <div class="report-card-subtitle">
+                    Overall attendance for each student
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Filters -->
+        <div class="filter-area">
+
+            <form method="GET">
+
+                <div class="row g-2 align-items-end">
+
+                    <!-- Search -->
+                    <div class="col-md-5">
+
+                        <div class="month-label">
+                            Search Student
+                        </div>
+
+                        <input
+                            type="text"
+                            name="search"
+                            class="filter-input"
+                            value="{{ request.GET.search }}"
+                            placeholder="Search student ID or name..."
+                        >
+
+                    </div>
+
+
+                    <!-- Section -->
+                    <div class="col-md-3">
+
+                        <div class="month-label">
+                            Section
+                        </div>
+
+                        <select
+                            name="section"
+                            class="filter-select"
+                        >
+
+                            <option value="">
+                                All Sections
+                            </option>
+
+                            {% for section in sections %}
+
+                            <option
+                                value="{{ section.id }}"
+                                {% if request.GET.section == section.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ section }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Month -->
+                    <div class="col-md-2">
+
+                        <div class="month-label">
+                            Month
+                        </div>
+
+                        <select
+                            name="month"
+                            class="filter-select"
+                        >
+
+                            <option value="1"
+                                {% if selected_month == 1 %}selected{% endif %}>
+                                January
+                            </option>
+
+                            <option value="2"
+                                {% if selected_month == 2 %}selected{% endif %}>
+                                February
+                            </option>
+
+                            <option value="3"
+                                {% if selected_month == 3 %}selected{% endif %}>
+                                March
+                            </option>
+
+                            <option value="4"
+                                {% if selected_month == 4 %}selected{% endif %}>
+                                April
+                            </option>
+
+                            <option value="5"
+                                {% if selected_month == 5 %}selected{% endif %}>
+                                May
+                            </option>
+
+                            <option value="6"
+                                {% if selected_month == 6 %}selected{% endif %}>
+                                June
+                            </option>
+
+                            <option value="7"
+                                {% if selected_month == 7 %}selected{% endif %}>
+                                July
+                            </option>
+
+                            <option value="8"
+                                {% if selected_month == 8 %}selected{% endif %}>
+                                August
+                            </option>
+
+                            <option value="9"
+                                {% if selected_month == 9 %}selected{% endif %}>
+                                September
+                            </option>
+
+                            <option value="10"
+                                {% if selected_month == 10 %}selected{% endif %}>
+                                October
+                            </option>
+
+                            <option value="11"
+                                {% if selected_month == 11 %}selected{% endif %}>
+                                November
+                            </option>
+
+                            <option value="12"
+                                {% if selected_month == 12 %}selected{% endif %}>
+                                December
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Search Button -->
+                    <div class="col-md-2">
+
+                        <button
+                            type="submit"
+                            class="filter-btn w-100"
+                        >
+
+                            <i class="bi bi-search"></i>
+
+                            Search
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <!-- Student Table -->
+        <div class="report-card-body table-responsive">
+
+            <table class="report-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Student</th>
+                        <th>Section</th>
+                        <th>Expected</th>
+                        <th>Attended</th>
+                        <th>Overall Attendance</th>
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+{% for item in student_reports %}
+
+<tr>
+
+    <td>
+        <div class="student-name">
+            {{ item.student.name }}
+        </div>
+
+        <div class="student-id">
+            {{ item.student.ID }}
+        </div>
+    </td>
+
+    <td>
+        {{ item.section }}
+    </td>
+
+    <td>
+        {{ item.expected }}
+    </td>
+
+    <td>
+        {{ item.attended }}
+    </td>
+
+    <td>
+
+        <div class="attendance-wrapper">
+
+            <div class="progress">
+
+                <div
+                    class="progress-bar
+                    {% if item.percentage >= 75 %}
+                        progress-good
+                    {% elif item.percentage >= 60 %}
+                        progress-warning
+                    {% else %}
+                        progress-danger
+                    {% endif %}"
+                    style="width: {{ item.percentage }}%;">
+                </div>
+
+            </div>
+
+            <span
+                class="attendance-value
+                {% if item.percentage >= 75 %}
+                    text-good
+                {% elif item.percentage >= 60 %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}">
+
+                {{ item.percentage }}%
+
+            </span>
+
+        </div>
+
+    </td>
+
+    <td>
+
+        {% if item.percentage >= 75 %}
+
+            <span class="status-badge status-good">
+                Good
+            </span>
+
+        {% elif item.percentage >= 60 %}
+
+            <span class="status-badge status-warning">
+                Warning
+            </span>
+
+        {% else %}
+
+            <span class="status-badge status-low">
+                Low
+            </span>
+
+        {% endif %}
+
+    </td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+    <td colspan="6" class="empty-state">
+        No student attendance data available.
+    </td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

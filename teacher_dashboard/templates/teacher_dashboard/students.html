@@ -1,0 +1,528 @@
+
+{% extends 'teacher_dashboard/baseteacher.html' %}
+
+{% block content %}
+
+<style>
+
+    .table-card {
+        background: #fff;
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 0 10px rgba(0,0,0,0.02);
+        padding: 24px;
+    }
+
+    .search-input {
+        background-color: #f8f9fa;
+        border-left: none;
+    }
+
+    .search-input-icon {
+        background-color: #f8f9fa;
+        border-right: none;
+        color: #6c757d;
+    }
+
+    .month-select {
+        min-width: 150px;
+        border-radius: 8px;
+    }
+
+</style>
+
+
+<div class="container-fluid p-0">
+
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h3 class="fw-bold text-dark mb-1">
+                Students
+            </h3>
+
+            <p class="text-muted m-0">
+
+                <a
+                    href="{% url 'teacher_dashboard:teacher_dashboard' %}"
+                    class="text-decoration-none text-muted"
+                >
+                    Dashboard
+                </a>
+
+                <span class="mx-1">></span>
+
+                <a
+                    href="{% url 'teacher_dashboard:students' assignment.section_id %}"
+                    class="text-decoration-none text-muted"
+                >
+                    Students
+                </a>
+
+                {% if allowed and assignment %}
+
+                    <span class="mx-1">></span>
+
+                    <span class="badge bg-primary-subtle text-primary">
+                        {{ assignment.section.sem }} -
+                        Section {{ assignment.section.name }}
+                    </span>
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+
+        <!-- =================================================
+             SECTION SWITCHER
+        ================================================== -->
+
+        <div class="dropdown">
+
+            <button
+                class="btn btn-white border dropdown-toggle fw-semibold shadow-sm"
+                type="button"
+                data-bs-toggle="dropdown"
+            >
+
+                <i class="bi bi-journal-bookmark text-primary me-1"></i>
+
+                Switch Section
+
+            </button>
+
+
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+
+                {% for assign in assignments %}
+
+                    <li>
+
+                        <a
+                            class="dropdown-item
+                            {% if assignment and assignment.section.id == assign.section.id %}
+                                active
+                            {% endif %}"
+                            href="{% url 'teacher_dashboard:students' assign.section_id %}"
+                        >
+
+                            {{ assign.section.sem }} -
+                            Section {{ assign.section.name }}
+
+                        </a>
+
+                    </li>
+
+                {% empty %}
+
+                    <li>
+
+                        <span class="dropdown-item text-muted">
+                            No Sections Assigned
+                        </span>
+
+                    </li>
+
+                {% endfor %}
+
+            </ul>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ACCESS DENIED
+    ====================================================== -->
+
+    {% if not allowed %}
+
+        <div
+            class="alert alert-danger d-flex align-items-center gap-3 p-4 rounded-3 border-0 shadow-sm"
+            role="alert"
+        >
+
+            <i class="bi bi-exclamation-octagon-fill fs-1"></i>
+
+            <div>
+
+                <h5 class="alert-heading fw-bold mb-1">
+                    Access Denied!
+                </h5>
+
+                <p class="mb-0">
+                    သင်မသင်ရသော Section ဖြစ်သောကြောင့်
+                    ကျောင်းသားစာရင်းကို ကြည့်ရှုခွင့်မရှိပါ။
+                    ညာဘက်အပေါ်ရှိ Switch Section မှ
+                    မိမိသင်ရသော Section ကို ရွေးချယ်ပါ။
+                </p>
+
+            </div>
+
+        </div>
+
+
+    {% else %}
+
+
+        <!-- =================================================
+             STUDENT TABLE
+        ================================================== -->
+
+        <div class="table-card">
+
+
+            <!-- =================================================
+                 SEARCH + MONTH
+            ================================================== -->
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+
+                <!-- SEARCH -->
+
+                <form
+                    method="GET"
+                    class="w-50"
+                >
+
+                    <div class="input-group">
+
+                        <span class="input-group-text search-input-icon">
+
+                            <i class="bi bi-search"></i>
+
+                        </span>
+
+
+                        <input
+                            type="text"
+                            name="search"
+                            class="form-control search-input"
+                            placeholder="Search student by name or roll no..."
+                            value="{{ search_query }}"
+                        >
+
+
+                        <!-- Keep selected month when searching -->
+
+                        <input
+                            type="hidden"
+                            name="month"
+                            value="{{ selected_month }}"
+                        >
+
+                    </div>
+
+                </form>
+
+
+
+                <!-- =================================================
+                     MONTH + ACTIONS
+                ================================================== -->
+
+                <div class="d-flex gap-2 align-items-center">
+
+
+                    <!-- MONTH -->
+
+                    <form method="GET">
+
+                        <!-- Keep search when changing month -->
+
+                        <input
+                            type="hidden"
+                            name="search"
+                            value="{{ search_query }}"
+                        >
+
+
+                        <select
+                            name="month"
+                            class="form-select month-select"
+                            onchange="this.form.submit()"
+                        >
+
+                            {% for month in months %}
+
+                                <option
+                                    value="{{ month.number }}"
+                                    {% if month.number == selected_month %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ month.name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </form>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SELECTED MONTH
+            ================================================== -->
+
+            <div class="mb-3">
+
+                <span class="text-muted small">
+
+                    Attendance for
+
+                    <strong class="text-dark">
+                        {{ selected_month_name }} {{ selected_year }}
+                    </strong>
+
+                </span>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 TABLE
+            ================================================== -->
+
+            <div class="table-responsive">
+
+                <table class="table align-middle table-hover">
+
+
+                    <thead class="text-muted border-bottom">
+
+                        <tr>
+
+                            <th scope="col">
+                                ID
+                            </th>
+
+                            <th scope="col">
+                                Name
+                            </th>
+
+                            <th scope="col">
+                                Class
+                            </th>
+
+                            <th
+                                scope="col"
+                                style="width: 30%;"
+                            >
+                                Attendance
+                                ({{ selected_month_name }})
+                            </th>
+
+                            <th
+                                scope="col"
+                                class="text-center"
+                            >
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                        {% for student in students %}
+
+                        <tr>
+
+
+                            <!-- ID -->
+
+                            <td class="fw-semibold">
+
+                                {{ student.ID }}
+
+                            </td>
+
+
+                            <!-- NAME -->
+
+                            <td>
+
+                                {{ student.name }}
+
+                            </td>
+
+
+                            <!-- CLASS -->
+
+                            <td>
+
+                                <span class="badge bg-light text-dark border">
+
+                                    {{ assignment.section.name }}
+
+                                </span>
+
+                            </td>
+
+
+                            <!-- ATTENDANCE -->
+
+                            <td>
+
+                                <div class="d-flex align-items-center gap-2">
+
+
+                                    <div
+                                        class="progress flex-grow-1"
+                                        style="height: 6px;"
+                                    >
+
+                                        <div
+                                            class="progress-bar
+                                            {% if student.attendance_percentage >= 75 %}
+                                                bg-success
+                                            {% elif student.attendance_percentage >= 50 %}
+                                                bg-warning
+                                            {% else %}
+                                                bg-danger
+                                            {% endif %}"
+                                            role="progressbar"
+                                            style="width: {{ student.attendance_percentage }}%;"
+                                        ></div>
+
+                                    </div>
+
+
+                                    <small class="fw-bold">
+
+                                        {{ student.attendance_percentage|floatformat:1 }}%
+
+                                    </small>
+
+                                </div>
+
+
+                                <small class="text-muted">
+
+                                    {{ student.attended_classes }}
+                                    /
+                                    {{ student.expected_classes }}
+
+                                    classes
+
+                                </small>
+
+                            </td>
+
+
+                            <!-- ACTION -->
+
+                            <td class="text-center">
+
+                                {% if student.qr_code %}
+
+                                    <a
+                                        href="{{ student.qr_code.url }}"
+                                        target="_blank"
+                                        class="btn btn-sm btn-light rounded-circle text-primary"
+                                        title="View QR Code"
+                                    >
+
+                                        <i class="bi bi-eye"></i>
+
+                                    </a>
+
+                                {% else %}
+
+                                    <span class="text-muted fs-7">
+                                        -
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                        </tr>
+
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="5"
+                                class="text-center py-5 text-muted"
+                            >
+
+                                <i
+                                    class="bi bi-people display-6 d-block mb-2 text-secondary"
+                                ></i>
+
+                                ဒီ Section ထဲတွင်ထိုကျောင်းသား မရှိသေးပါ။
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- =================================================
+                 FOOTER
+            ================================================== -->
+
+            <div
+                class="d-flex justify-content-between align-items-center mt-4 text-muted"
+            >
+
+                <small>
+
+                    Showing
+                    {{ students|length }}
+                    of
+                    {{ students|length }}
+                    entries
+
+                </small>
+
+
+                <small>
+
+                    {{ selected_month_name }}
+                    {{ selected_year }}
+
+                </small>
+
+            </div>
+
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

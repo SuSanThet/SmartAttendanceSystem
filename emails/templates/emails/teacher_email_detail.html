@@ -1,0 +1,357 @@
+{% extends "teacher_dashboard/baseteacher.html" %}
+
+{% block title %}Mail{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+.mail-detail-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e8edf5;
+    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+}
+
+.mail-detail-header {
+    padding: 22px 28px;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.mail-detail-subject {
+    font-size: 22px;
+    font-weight: 600;
+    color: #172033;
+}
+
+.sender-area {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-top: 18px;
+}
+
+.sender-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #e8f1ff;
+    color: #0d6efd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.sender-name {
+    font-weight: 600;
+    color: #334155;
+}
+
+.sender-email {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.mail-detail-date {
+    margin-left: auto;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.mail-detail-body {
+    padding: 35px 28px;
+    min-height: 300px;
+}
+
+.mail-message {
+    color: #334155;
+    font-size: 14px;
+    line-height: 1.9;
+    white-space: pre-wrap;
+}
+
+.mail-actions {
+    padding: 15px 28px;
+    border-top: 1px solid #edf0f5;
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="mb-3">
+
+        <a
+            href="{% url 'emails:teacher_email_home' %}"
+            class="btn btn-light">
+
+            <i class="bi bi-arrow-left me-2"></i>
+            Back to Inbox
+
+        </a>
+
+    </div>
+
+
+    <div class="mail-detail-card">
+
+        <!-- Header -->
+
+        <div class="mail-detail-header">
+
+            <div class="d-flex align-items-center justify-content-between">
+
+                <div class="mail-detail-subject">
+
+                    {{ mail.subject }}
+
+                </div>
+
+
+                <div class="d-flex gap-2">
+
+                    <!-- Delete -->
+
+                    <a
+                        href="{% url 'emails:teacher_delete_email' mail.id %}"
+                        class="btn btn-light text-danger">
+
+                        <i class="bi bi-trash"></i>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- Sender -->
+
+            <div class="sender-area">
+
+                <div class="sender-avatar">
+
+                    {{ mail.sender.username|first|upper }}
+
+                </div>
+
+
+                <div>
+
+                    <div class="sender-name">
+
+                        {{ mail.sender.get_full_name|default:mail.sender.username }}
+
+                    </div>
+
+                    <div class="sender-email">
+
+                        {{ mail.sender.email }}
+
+                    </div>
+
+                </div>
+
+
+                <div class="mail-detail-date">
+
+                    {{ mail.created_at|date:"F d, Y • h:i A" }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Message -->
+
+        <div class="mail-detail-body">
+
+            <div class="mail-message">
+
+{{ mail.message }}
+
+            </div>
+
+        </div>
+
+
+        <!-- Actions -->
+
+        <div class="mail-actions">
+
+            <!-- Reply -->
+
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#replyModal">
+
+                <i class="bi bi-reply me-2"></i>
+                Reply
+
+            </button>
+
+
+            <!-- Delete -->
+
+            <a
+                href="{% url 'emails:teacher_delete_email' mail.id %}"
+                class="btn btn-outline-danger">
+
+                <i class="bi bi-trash me-2"></i>
+                Delete
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- REPLY MODAL -->
+<!-- ========================= -->
+
+<div
+    class="modal fade"
+    id="replyModal"
+    tabindex="-1"
+    aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <!-- Modal Header -->
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    <i class="bi bi-reply me-2"></i>
+                    Reply
+
+                </h5>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <!-- Reply Form -->
+
+            <form
+                method="post"
+                action="{% url 'emails:reply_email' mail.id %}">
+
+                {% csrf_token %}
+
+
+                <div class="modal-body">
+
+                    <!-- To -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            To
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{% if mail.receiver == request.user %}{{ mail.sender.email }}{% else %}{{ mail.receiver.email }}{% endif %}"
+                            readonly>
+
+                    </div>
+
+
+                    <!-- Subject -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Subject
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{% if mail.subject|slice:':3' == 'Re:' %}{{ mail.subject }}{% else %}Re: {{ mail.subject }}{% endif %}"
+                            readonly>
+
+                    </div>
+
+
+                    <!-- Message -->
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Message
+                        </label>
+
+                        <textarea
+                            name="message"
+                            class="form-control"
+                            rows="8"
+                            placeholder="Write your reply..."
+                            required></textarea>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Modal Footer -->
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary">
+
+                        <i class="bi bi-send me-1"></i>
+                        Send Reply
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,456 @@
+{% extends "admin_dashboard/base.html" %}
+
+
+{% block extra_css %}
+
+<style>
+
+    /* Start Card Styling */
+
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        transition: all .3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        transform: translateY(-7px);
+    }
+
+    /* End Card Styling */
+
+
+    /* Start FAB */
+
+    .fab-container {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        z-index: 1050;
+    }
+
+
+    .fab-main {
+        width: 55px;
+        height: 55px;
+
+        border-radius: 16px;
+
+        background-color: #ffffff;
+
+        border: 2px solid #000000;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 25px;
+
+        color: #000000;
+
+        cursor: pointer;
+
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+
+        transition:
+            transform 0.3s ease,
+            background-color 0.3s;
+    }
+
+
+    .fab-container.active .fab-main {
+        transform: rotate(45deg);
+    }
+
+
+    .fab-item {
+        position: absolute;
+
+        width: 62px;
+        height: 62px;
+
+        border-radius: 50%;
+
+        background-color: #ffffff;
+
+        border: 2px solid #000000;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: center;
+
+        justify-content: center;
+
+        text-decoration: none;
+
+        color: #000000;
+
+        opacity: 0;
+
+        pointer-events: none;
+
+        transition:
+            all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+
+        bottom: 0;
+        right: 0;
+    }
+
+
+    .fab-item i {
+        font-size: 17px;
+        line-height: 1;
+    }
+
+
+    .fab-item span {
+        font-size: 8px;
+
+        font-weight: 600;
+
+        margin-top: 3px;
+
+        text-align: center;
+
+        white-space: nowrap;
+    }
+
+
+    .fab-container.active .fab-item {
+        opacity: 1;
+
+        pointer-events: auto;
+    }
+
+
+    /* Organization */
+
+    .fab-container.active .fab-item:nth-child(1) {
+        transform: translate(-80px, 0px);
+    }
+
+
+    /* Teaching */
+
+    .fab-container.active .fab-item:nth-child(2) {
+        transform: translate(-135px, -55px);
+    }
+
+
+    /* Major Option */
+
+    .fab-container.active .fab-item:nth-child(3) {
+        transform: translate(-55px, -90px);
+    }
+
+
+    /* Section */
+
+    .fab-container.active .fab-item:nth-child(4) {
+        transform: translate(-115px, -135px);
+    }
+
+
+    /* Major */
+
+    .fab-container.active .fab-item:nth-child(5) {
+        transform: translate(-10px, -155px);
+    }
+
+
+    /* Department */
+
+    .fab-container.active .fab-item:nth-child(6) {
+        transform: translate(-10px, -225px);
+    }
+
+
+    /* End FAB */
+
+</style>
+
+{% endblock %}
+
+
+
+{% block title %}
+
+Sections
+
+{% endblock %}
+
+
+
+{% block content %}
+
+
+<!-- Start Card Section -->
+
+<div class="row g-3 mb-4">
+
+    {% for section in sections %}
+
+        <div class="col-md-6 col-lg-4">
+
+            <div class="card shadow-sm border-0 rounded-4 p-3 h-100">
+
+                <div class="card-body d-flex flex-column justify-content-between p-0">
+
+
+                    <!-- Header Part -->
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+                        {% with academic_class=section.academic_class.first %}
+
+                            {% if academic_class and academic_class.department %}
+
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1">
+
+                                    {{ academic_class.major.short_code }}
+
+                                    Major
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1">
+
+                                    No Department
+
+                                </span>
+
+                            {% endif %}
+
+                        {% endwith %}
+
+
+                        {% if section.student_count > 0 %}
+
+                            <span class="badge bg-success rounded-pill px-3 py-1">
+
+                                Active
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-secondary rounded-pill px-3 py-1">
+
+                                Empty
+
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Section Name -->
+
+                    <h4 class="fw-bold text-dark my-2 ms-2">
+
+                        {{ section.name }}
+
+                    </h4>
+
+
+                    <!-- Semester -->
+
+                    <div class="text-secondary small ms-2 mb-3">
+
+                        Semester {{ section.sem }}
+
+                    </div>
+
+
+                    <!-- Middle Part -->
+
+                    <div class="bg-light p-3 rounded-3 mb-3">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <span class="text-secondary">
+
+                                Enrolled Students
+
+                            </span>
+
+                            <span class="badge bg-primary rounded-pill">
+
+                                {{ section.student_count }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Bottom Part -->
+
+                    <a
+                        href="{% url 'admin_dashboard:sections_details' section.id %}"
+                        class="text-decoration-none d-flex justify-content-end"
+                    >
+
+                        View details
+
+                    </a>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% empty %}
+
+        <div class="col-12">
+
+            <div class="card shadow-sm border-0 rounded-4 p-5 text-center">
+
+                <div class="card-body">
+
+                    <i class="fa-solid fa-layer-group text-secondary fs-1 mb-3"></i>
+
+                    <h5 class="fw-bold text-dark">
+
+                        No Sections Found
+
+                    </h5>
+
+                    <p class="text-secondary mb-0">
+
+                        There are no sections available yet.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+<!-- End Card Section -->
+
+
+
+<!-- Start Floating Action Button -->
+
+<div class="fab-container" id="fabContainer">
+
+
+    <!-- Organization -->
+
+    <a href="{% url 'admin_dashboard:add_academic_class' %}" class="fab-item">
+
+        <i class="bi bi-buildings"></i>
+
+        <span>acadamic(+)</span>
+
+    </a>
+
+
+    <!-- Teaching -->
+
+    <a href="{% url 'admin_dashboard:add_teaching' %}" class="fab-item">
+
+        <i class="bi bi-easel"></i>
+
+        <span>teaching(+)</span>
+
+    </a>
+
+
+
+    <!-- Section -->
+
+    <a href="{% url 'admin_dashboard:add_section' %}" class="fab-item">
+
+        <i class="bi bi-list-task"></i>
+
+        <span>section(+)</span>
+
+    </a>
+
+
+    <!-- Major -->
+
+    <a href="{% url 'admin_dashboard:add_major' %}" class="fab-item">
+
+        <i class="bi bi-mortarboard"></i>
+
+        <span>major(+)</span>
+
+    </a>
+
+    <!--Subj -->
+
+    <a href="{% url 'admin_dashboard:add_subject' %}" class="fab-item">
+
+       <i class="fa-solid fa-book"></i>
+        <span>subj(+)</span>
+
+    </a>
+    <!-- Department -->
+
+    <a href="{% url 'admin_dashboard:add_department' %}" class="fab-item">
+
+        <i class="bi bi-bank"></i>
+
+        <span>dept(+)</span>
+
+    </a>
+
+
+    <!-- Main Button -->
+
+    <div class="fab-main" id="fabToggle">
+
+        <i class="bi bi-plus-lg"></i>
+
+    </div>
+
+
+</div>
+
+<!-- End Floating Action Button -->
+
+
+{% endblock %}
+
+
+
+{% block scripts %}
+
+<script>
+
+    const fabContainer =
+        document.getElementById('fabContainer');
+
+    const fabToggle =
+        document.getElementById('fabToggle');
+
+
+    fabToggle.addEventListener('click', function () {
+
+        fabContainer.classList.toggle('active');
+
+    });
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,1008 @@
+{% extends 'teacher_dashboard/baseteacher.html' %}
+
+{% block title %}
+Manual Attendance
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .manual-container {
+        max-width: 1100px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        margin-bottom: 25px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 5px;
+    }
+
+    .breadcrumb {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .selection-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+    }
+
+    .selection-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 20px;
+    }
+
+    .selection-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 14px;
+        background: #ffffff;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+    }
+
+    /* weekend warning */
+
+    .date-warning {
+        display: none;
+        color: #dc2626;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 2px;
+    }
+
+    .date-warning.show {
+        display: block;
+    }
+
+    .load-btn {
+        margin-top: 22px;
+        padding: 10px 22px;
+        border: none;
+        border-radius: 8px;
+        background: #2563eb;
+        color: #ffffff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .load-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .load-btn:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+    }
+
+    .schedule-card {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .schedule-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1e3a8a;
+        margin-bottom: 18px;
+    }
+
+    .schedule-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 15px;
+    }
+
+    .schedule-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .schedule-item small {
+        font-size: 11px;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .schedule-item strong {
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .attendance-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .attendance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .attendance-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .student-count {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .attendance-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .attendance-table th {
+        background: #f8fafc;
+        padding: 13px 15px;
+        text-align: left;
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 700;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .attendance-table td {
+        padding: 14px 15px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+        color: #1e293b;
+        vertical-align: middle;
+    }
+
+    .student-id {
+        font-weight: 700;
+        color: #64748b;
+    }
+
+    .student-name {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .status-select {
+        padding: 7px 12px;
+        border-radius: 7px;
+        border: 1px solid transparent;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        outline: none;
+    }
+
+    .status-select.present {
+        background: #dcfce7;
+        color: #15803d;
+        border-color: #bbf7d0;
+    }
+
+    .status-select.absent {
+        background: #fee2e2;
+        color: #b91c1c;
+        border-color: #fecaca;
+    }
+
+    .remark {
+        width: 180px;
+        padding: 7px 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 7px;
+        outline: none;
+        font-size: 13px;
+        box-sizing: border-box;
+    }
+
+    .remark:focus {
+        border-color: #94a3b8;
+    }
+
+    .attendance-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 22px;
+    }
+
+    .mark-all {
+        padding: 9px 17px;
+        background: #ffffff;
+        border: 1px solid #2563eb;
+        color: #2563eb;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .mark-all:hover {
+        background: #eff6ff;
+    }
+
+    .save-btn {
+        padding: 10px 25px;
+        background: #16a34a;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .save-btn:hover {
+        background: #15803d;
+    }
+
+    .empty {
+        text-align: center;
+        padding: 40px;
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+
+        .selection-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .schedule-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+    }
+
+    @media (max-width: 600px) {
+
+        .attendance-card,
+        .selection-card {
+            padding: 15px;
+        }
+
+        .schedule-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .attendance-table {
+            min-width: 700px;
+        }
+
+        .attendance-card {
+            overflow-x: auto;
+        }
+
+    }
+
+</style>
+
+
+<div class="manual-container">
+
+
+    {% if messages %}
+        {% for message in messages %}
+            <div
+                class="alert
+                {% if message.tags == 'error' %}
+                    alert-danger
+                {% elif message.tags == 'success' %}
+                    alert-success
+                {% else %}
+                    alert-info
+                {% endif %}
+                alert-dismissible fade show"
+                role="alert"
+            >
+                <i class="bi bi-exclamation-circle me-2"></i>
+                {{ message }}
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                ></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="page-header">
+    <div class="page-header">
+
+        <div class="page-title">
+            Manual Attendance
+        </div>
+
+        <div class="breadcrumb">
+           <a href="{%url 'teacher_dashboard:teacher_dashboard'%}">Dashboard ></a> <a href="{%url 'teacher_dashboard:teacher_attendance_list'%}">Attendance</a> > Manual Attendance
+        </div>
+
+    </div>
+
+
+    <div class="selection-card">
+
+        <div class="selection-title">
+            Select Attendance Section
+        </div>
+
+
+        <form method="GET" id="attendanceForm">
+
+            <div class="selection-grid">
+
+
+                <!-- SECTION -->
+
+                <div class="form-group">
+
+                    <label for="section">
+                        Section
+                    </label>
+
+                    <select
+                        id="section"
+                        name="section_id"
+                        class="form-control"
+                        required
+                    >
+
+                        <option value="">
+                            -- Select Section --
+                        </option>
+
+                        {% for section in sections %}
+
+                            <option
+                                value="{{ section.id }}"
+                                {% if selected_section_id == section.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+
+                                {{ section.sem }}
+                                Section-{{ section.name }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- DATE -->
+
+                <div class="form-group">
+
+                    <label for="attendance_date">
+                        Attendance Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="attendance_date"
+                        name="attendance_date"
+                        class="form-control"
+                        value="{{ attendance_date|date:'Y-m-d' }}"
+                        required
+                    >
+
+                    <small
+                        id="date-warning"
+                        class="date-warning"
+                    >
+                        ⚠️ Attendance can only be taken from Monday to Friday.
+                    </small>
+
+                </div>
+
+
+                <!-- SCHEDULE -->
+
+                <div class="form-group">
+
+                    <label for="schedule">
+                        Class / Time Slot
+                    </label>
+
+                    <select
+                        id="schedule"
+                        name="schedule_id"
+                        class="form-control"
+                        required
+                    >
+
+                        <option value="">
+                            -- Select Class & Time --
+                        </option>
+
+                        {% for schedule_item in schedules %}
+
+                            <option
+                                value="{{ schedule_item.id }}"
+                                {% if selected_schedule_id == schedule_item.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+
+                                {{ schedule_item.subject.code }}
+                                -
+                                {{ schedule_item.class_group.section.sem }}
+                                Section-{{ schedule_item.class_group.section.name }}
+                                -
+                                {{ schedule_item.time_slot }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="load-btn"
+                id="loadBtn"
+            >
+                Load Students
+            </button>
+
+        </form>
+
+    </div>
+
+
+    {% if schedule %}
+
+        <div class="schedule-card">
+
+            <div class="schedule-title">
+                Attendance Session Information
+            </div>
+
+            <div class="schedule-grid">
+
+
+                <div class="schedule-item">
+
+                    <small>
+                        Subject
+                    </small>
+
+                    <strong>
+                        {{ schedule.subject.code }}
+                    </strong>
+
+                </div>
+
+
+                <div class="schedule-item">
+
+                    <small>
+                        Section
+                    </small>
+
+                    <strong>
+
+                        {{ schedule.class_group.section.sem }}
+                        Section-{{ schedule.class_group.section.name }}
+
+                    </strong>
+
+                </div>
+
+
+                <div class="schedule-item">
+
+                    <small>
+                        Date
+                    </small>
+
+                    <strong>
+                        {{ attendance_date|date:"d M Y" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="schedule-item">
+
+                      <small>
+                        Day
+                      </small>
+
+                      <strong>
+                        {{ attendance_day }}
+                      </strong>
+
+                </div>
+
+
+                <div class="schedule-item">
+
+                    <small>
+                        Time
+                    </small>
+
+                    <strong>
+                        {{ schedule.time_slot }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="attendance-card">
+
+            <div class="attendance-header">
+
+                <div class="attendance-title">
+                    Student Attendance
+                </div>
+
+                <div class="student-count">
+
+                    {{ students|length }}
+                    Students
+
+                </div>
+
+            </div>
+
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="schedule_id"
+                    value="{{ schedule.id }}"
+                >
+
+                <input
+                    type="hidden"
+                    name="section_id"
+                    value="{{ section.id }}"
+                >
+
+                <input
+                    type="hidden"
+                    name="attendance_date"
+                    id="hiddenAttendanceDate"
+                    value="{{ attendance_date|date:'Y-m-d' }}"
+                >
+
+
+                <table class="attendance-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th style="width: 18%;">
+                                Student ID
+                            </th>
+
+                            <th style="width: 32%;">
+                                Student Name
+                            </th>
+
+                            <th style="width: 20%;">
+                                Status
+                            </th>
+
+                            <th style="width: 30%;">
+                                Remark
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for item in students %}
+
+                            <tr>
+
+                                <td class="student-id">
+                                    {{ item.student.ID }}
+                                </td>
+
+                                <td class="student-name">
+                                    {{ item.student.name }}
+                                </td>
+
+                                <td>
+
+                                    <select
+                                        name="status_{{ item.student.ID }}"
+                                        class="status-select {% if item.status == 'ABSENT' %}absent{% else %}present{% endif %}"
+                                        onchange="changeStatus(this)"
+                                    >
+
+                                        <option
+                                            value="PRESENT"
+                                            {% if item.status == 'PRESENT' %}
+                                                selected
+                                            {% endif %}
+                                        >
+                                            ✔ Present
+                                        </option>
+
+                                        <option
+                                            value="ABSENT"
+                                            {% if item.status == 'ABSENT' %}
+                                                selected
+                                            {% endif %}
+                                        >
+                                            ✖ Absent
+                                        </option>
+
+                                        <option
+                                            value="LATE"
+                                            {% if item.status == 'LATE' %}
+                                                selected
+                                            {% endif %}
+                                        >
+                                            ⏰ Late
+                                        </option>
+
+                                    </select>
+
+                                </td>
+
+
+                                <td>
+
+                                    <input
+                                        type="text"
+                                        name="remark_{{ item.student.ID }}"
+                                        class="remark"
+                                        placeholder="-"
+                                    >
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="4"
+                                    class="empty"
+                                >
+
+                                    No students found in this section.
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+
+                {% if students %}
+
+                    <div class="attendance-actions">
+
+                        <button
+                            type="button"
+                            class="mark-all"
+                            onclick="markAllPresent()"
+                        >
+                            Mark All Present
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="save-btn"
+                            id="saveBtn"
+                        >
+                            Save Attendance
+                        </button>
+
+                    </div>
+
+                {% endif %}
+
+            </form>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<script>
+
+    function changeStatus(select) {
+
+        select.classList.remove(
+            "present",
+            "absent"
+        );
+
+        if (select.value === "PRESENT") {
+
+            select.classList.add("present");
+
+        } else {
+
+            select.classList.add("absent");
+
+        }
+
+    }
+
+
+    function markAllPresent() {
+
+        const selects =
+            document.querySelectorAll(
+                ".status-select"
+            );
+
+        selects.forEach(function(select) {
+
+            select.value = "PRESENT";
+
+            changeStatus(select);
+
+        });
+
+    }
+
+
+    const attendanceForm =
+        document.getElementById(
+            "attendanceForm"
+        );
+
+    const attendanceDate =
+        document.getElementById(
+            "attendance_date"
+        );
+
+    const dateWarning =
+        document.getElementById(
+            "date-warning"
+        );
+
+    const loadBtn =
+        document.getElementById(
+            "loadBtn"
+        );
+
+    const hiddenAttendanceDate =
+        document.getElementById(
+            "hiddenAttendanceDate"
+        );
+
+
+    function isWeekend(dateValue) {
+
+        if (!dateValue) {
+            return false;
+        }
+
+        const selectedDate =
+            new Date(
+                dateValue + "T00:00:00"
+            );
+
+        const day =
+            selectedDate.getDay();
+
+        return (
+            day === 0 ||
+            day === 6
+        );
+    }
+
+
+    /*
+     * Date change
+     */
+
+    attendanceDate.addEventListener(
+        "change",
+        function() {
+
+            if (!this.value) {
+
+                dateWarning.classList.remove(
+                    "show"
+                );
+
+                return;
+            }
+
+
+            if (isWeekend(this.value)) {
+
+                dateWarning.classList.add(
+                    "show"
+                );
+
+                this.value = "";
+
+                if (hiddenAttendanceDate) {
+
+                    hiddenAttendanceDate.value = "";
+
+                }
+
+            } else {
+
+                dateWarning.classList.remove(
+                    "show"
+                );
+
+                if (hiddenAttendanceDate) {
+
+                    hiddenAttendanceDate.value =
+                        this.value;
+
+                }
+
+            }
+
+        }
+    );
+
+
+    /*
+     * Form submit
+     */
+
+    attendanceForm.addEventListener(
+        "submit",
+        function(event) {
+
+            if (!attendanceDate.value) {
+
+                event.preventDefault();
+
+                dateWarning.classList.add(
+                    "show"
+                );
+
+                return;
+            }
+
+
+            if (isWeekend(attendanceDate.value)) {
+
+                event.preventDefault();
+
+                dateWarning.classList.add(
+                    "show"
+                );
+
+                attendanceDate.value = "";
+
+                if (hiddenAttendanceDate) {
+
+                    hiddenAttendanceDate.value = "";
+
+                }
+
+                return;
+            }
+
+        }
+    );
+
+
+    /*
+     * Initial check
+     */
+
+    if (
+        attendanceDate.value &&
+        isWeekend(attendanceDate.value)
+    ) {
+
+        attendanceDate.value = "";
+
+        dateWarning.classList.add(
+            "show"
+        );
+
+        if (hiddenAttendanceDate) {
+
+            hiddenAttendanceDate.value = "";
+
+        }
+
+    }
+
+
+    /*
+     * Status color
+     */
+
+    document
+        .querySelectorAll(".status-select")
+        .forEach(function(select) {
+
+            changeStatus(select);
+
+        });
+
+</script>
+
+{% endblock %}

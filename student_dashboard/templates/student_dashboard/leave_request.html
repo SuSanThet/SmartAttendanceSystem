@@ -1,0 +1,825 @@
+{% extends 'student_dashboard/base.html' %}
+
+{% block title %}Leave Request{% endblock %}
+
+{% block content %}
+
+<style>
+    .mail-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .mail-card,
+    .history-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        overflow: hidden;
+    }
+
+    .mail-header,
+    .history-header {
+        padding: 22px 28px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .mail-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 5px;
+    }
+
+    .mail-subtitle {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .compose-body {
+        padding: 25px 28px;
+    }
+
+    .mail-row {
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 12px 0;
+    }
+
+    .mail-label {
+        width: 110px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .mail-value {
+        flex: 1;
+        color: #1e293b;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        border: none;
+        outline: none;
+        font-size: 14px;
+        color: #1e293b;
+        background: transparent;
+    }
+
+    .date-group {
+        display: flex;
+        gap: 20px;
+        flex: 1;
+    }
+
+    .date-box {
+        flex: 1;
+    }
+
+    .date-box label {
+        display: block;
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 5px;
+    }
+
+    .date-box input {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        padding: 9px 11px;
+        outline: none;
+        font-size: 14px;
+    }
+
+    .reason-box {
+        margin-top: 20px;
+    }
+
+    .reason-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .reason-box textarea {
+        width: 100%;
+        min-height: 180px;
+        resize: vertical;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 14px;
+        outline: none;
+        color: #1e293b;
+    }
+
+    .reason-box textarea:focus,
+    .date-box input:focus {
+        border-color: #2563eb;
+    }
+
+    .mail-footer {
+        padding: 18px 28px;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .send-btn {
+        border: none;
+        background: #2563eb;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 7px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .send-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .history-card {
+        margin-top: 25px;
+    }
+
+    .history-title {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .request-slider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 20px 25px 10px;
+    }
+
+    .request-track-wrapper {
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .request-track {
+        display: flex;
+        transition: transform 0.35s ease;
+    }
+
+    .request-card {
+        flex: 0 0 calc(33.333% - 14px);
+        margin-right: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 18px;
+        background: #ffffff;
+        min-height: 190px;
+    }
+
+    .request-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .request-subject {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .request-date {
+        font-size: 11px;
+        color: #94a3b8;
+        margin-top: 4px;
+    }
+
+    .request-info {
+        display: flex;
+        gap: 25px;
+        margin-bottom: 18px;
+    }
+
+    .info-item span,
+    .request-reason span {
+        display: block;
+        font-size: 11px;
+        color: #94a3b8;
+        margin-bottom: 4px;
+    }
+
+    .info-item strong {
+        font-size: 13px;
+        color: #1e293b;
+    }
+
+    .request-reason p {
+        font-size: 13px;
+        color: #475569;
+        margin: 0;
+        line-height: 1.5;
+
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .slider-btn {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        border-radius: 50%;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #475569;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .slider-btn:hover {
+        background: #f8fafc;
+        color: #2563eb;
+        border-color: #2563eb;
+    }
+
+    .slider-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+    }
+
+    .slider-dots {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        padding: 12px 0 20px;
+    }
+
+    .slider-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #cbd5e1;
+        cursor: pointer;
+    }
+
+    .slider-dot.active {
+        background: #2563eb;
+        width: 18px;
+        border-radius: 5px;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 5px 11px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .pending {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    .approved {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .rejected {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .empty-request {
+        text-align: center;
+        padding: 45px 20px;
+        color: #94a3b8;
+    }
+</style>
+
+
+<div class="mail-wrapper">
+
+    <!-- Compose -->
+
+    <div class="mail-card">
+
+        <div class="mail-header">
+
+            <h1 class="mail-title">
+                Leave Request
+            </h1>
+
+            <div class="mail-subtitle">
+                Submit a leave request to the administrator
+            </div>
+
+        </div>
+
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="compose-body">
+
+                <div class="mail-row">
+
+                    <div class="mail-label">
+                        To
+                    </div>
+
+                    <div class="mail-value">
+                        Administrator
+                    </div>
+
+                </div>
+
+
+                <div class="mail-row">
+
+                    <div class="mail-label">
+                        From
+                    </div>
+
+                    <div class="mail-value">
+                        {{ profile.student.ID }} -
+                        {{ profile.student.name }}
+                    </div>
+
+                </div>
+
+
+                <div class="mail-row">
+
+                    <div class="mail-label">
+                        Subject
+                    </div>
+
+                    <div class="mail-value">
+
+                        <input
+                            type="text"
+                            name="subject"
+                            class="form-control"
+                            value="Leave Request"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- Dates -->
+
+                <div class="mail-row">
+
+                    <div class="mail-label">
+                        Dates
+                    </div>
+
+                    <div class="date-group">
+
+                        <div class="date-box">
+
+                            <label>
+                                From Date
+                            </label>
+
+                            <input
+                                type="date"
+                                name="start_date"
+                                id="start_date"
+                                min="{% now 'Y-m-d' %}"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="date-box">
+
+                            <label>
+                                To Date
+                            </label>
+
+                            <input
+                                type="date"
+                                name="end_date"
+                                id="end_date"
+                                min="{% now 'Y-m-d' %}"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Reason -->
+
+                <div class="reason-box">
+
+                    <label class="reason-label">
+                        Reason
+                    </label>
+
+                    <textarea
+                        name="reason"
+                        placeholder="Write your reason for leave..."
+                        required
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <div class="mail-footer">
+
+                <button
+                    type="submit"
+                    class="send-btn"
+                >
+
+                    <i class="fa-solid fa-paper-plane"></i>
+
+                    Send Request
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- My Leave Requests -->
+
+    <div class="history-card">
+
+        <div class="history-header">
+
+            <h2 class="history-title">
+                My Leave Requests
+            </h2>
+
+        </div>
+
+
+        {% if leave_requests %}
+
+        <div class="request-slider">
+
+            <button
+                type="button"
+                class="slider-btn"
+                id="prevBtn"
+                onclick="moveRequests(-1)"
+            >
+
+                <i class="fa-solid fa-chevron-left"></i>
+
+            </button>
+
+
+            <div class="request-track-wrapper">
+
+                <div
+                    class="request-track"
+                    id="requestTrack"
+                >
+
+                    {% for leave in leave_requests %}
+
+                    <div class="request-card">
+
+                        <div class="request-card-header">
+
+                            <div>
+
+                                <div class="request-subject">
+                                    Leave Request
+                                </div>
+
+                                <div class="request-date">
+                                    Submitted
+                                    {{ leave.created_at|date:"d-m-Y" }}
+                                </div>
+
+                            </div>
+
+
+                            {% if leave.status == "PENDING" %}
+
+                                <span class="status pending">
+                                    Pending
+                                </span>
+
+                            {% elif leave.status == "APPROVED" %}
+
+                                <span class="status approved">
+                                    Approved
+                                </span>
+
+                            {% elif leave.status == "REJECTED" %}
+
+                                <span class="status rejected">
+                                    Rejected
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Leave Dates -->
+
+                        <div class="request-info">
+
+                            <div class="info-item">
+
+                                <span>
+                                    From Date
+                                </span>
+
+                                <strong>
+                                    {{ leave.start_date|date:"d-m-Y" }}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="info-item">
+
+                                <span>
+                                    To Date
+                                </span>
+
+                                <strong>
+                                    {{ leave.end_date|date:"d-m-Y" }}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Reason -->
+
+                        <div class="request-reason">
+
+                            <span>
+                                Reason
+                            </span>
+
+                            <p>
+                                {{ leave.reason }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="slider-btn"
+                id="nextBtn"
+                onclick="moveRequests(1)"
+            >
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+            </button>
+
+        </div>
+
+
+        <div
+            class="slider-dots"
+            id="sliderDots"
+        ></div>
+
+
+        {% else %}
+
+        <div class="empty-request">
+
+            <i class="fa-regular fa-folder-open"></i>
+
+            <p>
+                No leave requests yet.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<script>
+
+let currentSlide = 0;
+
+const cardsPerSlide = 3;
+
+
+function updateSlider() {
+
+    const track =
+        document.getElementById("requestTrack");
+
+    const cards =
+        document.querySelectorAll(".request-card");
+
+    if (!track || !cards.length) {
+        return;
+    }
+
+    const totalSlides =
+        Math.ceil(cards.length / cardsPerSlide);
+
+    const cardWidth =
+        cards[0].offsetWidth +
+        parseFloat(
+            getComputedStyle(cards[0]).marginRight
+        );
+
+    track.style.transform =
+        `translateX(-${currentSlide * cardWidth * cardsPerSlide}px)`;
+
+
+    document
+        .querySelectorAll(".slider-dot")
+        .forEach((dot, index) => {
+
+            dot.classList.toggle(
+                "active",
+                index === currentSlide
+            );
+
+        });
+
+
+    document.getElementById("prevBtn").disabled =
+        currentSlide === 0;
+
+    document.getElementById("nextBtn").disabled =
+        currentSlide >= totalSlides - 1;
+
+}
+
+
+function moveRequests(direction) {
+
+    const cards =
+        document.querySelectorAll(".request-card");
+
+    if (!cards.length) {
+        return;
+    }
+
+    const totalSlides =
+        Math.ceil(cards.length / cardsPerSlide);
+
+    currentSlide += direction;
+
+    if (currentSlide < 0) {
+        currentSlide = 0;
+    }
+
+    if (currentSlide >= totalSlides) {
+        currentSlide = totalSlides - 1;
+    }
+
+    updateSlider();
+
+}
+
+
+function createDots() {
+
+    const cards =
+        document.querySelectorAll(".request-card");
+
+    const dots =
+        document.getElementById("sliderDots");
+
+    if (!cards.length || !dots) {
+        return;
+    }
+
+    const totalSlides =
+        Math.ceil(cards.length / cardsPerSlide);
+
+    dots.innerHTML = "";
+
+    for (let i = 0; i < totalSlides; i++) {
+
+        const dot =
+            document.createElement("span");
+
+        dot.classList.add("slider-dot");
+
+        if (i === 0) {
+            dot.classList.add("active");
+        }
+
+        dot.onclick = function () {
+
+            currentSlide = i;
+
+            updateSlider();
+
+        };
+
+        dots.appendChild(dot);
+
+    }
+
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        createDots();
+
+        updateSlider();
+
+    }
+);
+
+
+window.addEventListener(
+    "resize",
+    updateSlider
+);
+
+
+/* Date restriction */
+
+const startDate =
+    document.getElementById("start_date");
+
+const endDate =
+    document.getElementById("end_date");
+
+
+if (startDate && endDate) {
+
+    startDate.addEventListener(
+        "change",
+        function () {
+
+            endDate.min = this.value;
+
+            if (
+                endDate.value &&
+                endDate.value < this.value
+            ) {
+
+                endDate.value = "";
+
+            }
+
+        }
+    );
+
+}
+
+</script>
+
+{% endblock %}

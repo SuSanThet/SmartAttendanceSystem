@@ -1,0 +1,754 @@
+{% extends "admin_dashboard/base.html" %}
+
+{% block extra_css %}
+
+<style>
+
+    .icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .icon-blue-light {
+        background-color: #e8f1ff;
+        color: #0d6efd;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+    }
+
+    .form-label {
+        margin-bottom: 8px;
+    }
+
+    .avatar-preview {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        background-color: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        margin: 0 auto;
+    }
+
+    .avatar-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .photo-upload-box {
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        background-color: #f8fafc;
+    }
+
+    .form-control {
+        border-radius: 10px;
+    }
+
+    .form-control:focus {
+        border-color: #4f46e5 !important;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.2) !important;
+    }
+
+    .custom-select {
+        width: 100%;
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block title %}
+Add Teacher
+{% endblock %}
+
+
+{% block content %}
+
+<nav class="mb-4">
+
+    <ol class="breadcrumb">
+
+        <li class="breadcrumb-item">
+
+            <a
+                href="{% url 'teacher' %}"
+                class="text-decoration-none">
+
+                Teachers
+
+            </a>
+
+        </li>
+
+        <li class="breadcrumb-item">
+
+            Add Teacher
+
+        </li>
+
+    </ol>
+
+</nav>
+
+
+<form
+    method="POST"
+    enctype="multipart/form-data"
+    class="mt-4">
+
+    {% csrf_token %}
+
+
+    <div class="row g-3">
+
+
+        <!-- Profile Photo -->
+
+        <div class="col-lg-4">
+
+            <div class="photo-upload-box p-4 text-center">
+
+                <div class="avatar-preview mb-3">
+
+                    <i
+                        id="defaultIcon"
+                        class="fa-solid fa-user-plus text-secondary fs-1">
+                    </i>
+
+                    <img
+                        id="previewImg"
+                        src=""
+                        alt="Preview"
+                        class="d-none">
+
+                </div>
+
+
+                <label
+                    for="photoInput"
+                    class="btn btn-outline-secondary btn-sm mb-2">
+
+                    <i class="fa-solid fa-camera me-1"></i>
+
+                    Upload Photo
+
+                </label>
+
+
+                <input
+                    type="file"
+                    id="photoInput"
+                    class="d-none"
+                    name="profile_photo"
+                    accept="image/*">
+
+
+                <div
+                    class="form-text text-muted"
+                    style="font-size: 0.75rem;">
+
+                    JPG, PNG or GIF (Max 2MB)
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Form -->
+
+        <div class="col-lg-8">
+
+            <div class="row">
+
+
+                <!-- Name -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="fullName"
+                        class="form-label fw-semibold">
+
+                        Full Name
+                        <span class="text-danger">*</span>
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="fullName"
+                        class="form-control"
+                        name="name"
+                        placeholder="Enter Full Name"
+                        value="{{ form.name.value|default:'' }}"
+                        required>
+
+
+                    {% if form.name.errors %}
+
+                        <div class="text-danger small mt-1">
+                            {{ form.name.errors }}
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Teacher ID -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="teacherID"
+                        class="form-label fw-semibold">
+
+                        Teacher ID
+                        <span class="text-danger">*</span>
+
+                    </label>
+
+
+                    <input
+    type="text"
+    name="TrID"
+    class="form-control"
+    value="{{ form.TrID.value|default:'' }}"
+    placeholder="e.g. Tr001"
+    required
+>
+
+{% for error in form.TrID.errors %}
+    <div class="text-danger small mt-1">
+        {{ error }}
+    </div>
+{% endfor %}
+
+                </div>
+
+
+                <!-- Subject -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="selectSubject"
+                        class="form-label fw-semibold">
+
+                        Subject
+                        <span class="text-danger">*</span>
+
+                    </label>
+
+
+                    <select
+                        id="selectSubject"
+                        class="custom-select"
+                        name="subj"
+                        data-placeholder="Select Subject"
+                        multiple
+                        required>
+
+                        <option value=""></option>
+
+                    </select>
+
+
+                    {% if form.subj.errors %}
+
+                        <div class="text-danger small mt-1">
+                            {{ form.subj.errors }}
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Department -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="selectDepartment"
+                        class="form-label fw-semibold">
+
+                        Department
+                        <span class="text-danger">*</span>
+
+                    </label>
+
+
+                    <select
+                        id="selectDepartment"
+                        class="custom-select"
+                        name="dept"
+                        data-placeholder="Select Department"
+                        required>
+
+                        <option value=""></option>
+
+                        {% for dept in departments %}
+
+                            <option
+                                value="{{ dept.id }}"
+                                {% if form.dept.value|stringformat:"s" == dept.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >
+
+                                {{ dept.name }} ({{ dept.short_code }})
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+
+                    {% if form.dept.errors %}
+
+                        <div class="text-danger small mt-1">
+                            {{ form.dept.errors }}
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Position -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="selectPosition"
+                        class="form-label fw-semibold">
+
+                        Position
+                        <span class="text-danger">*</span>
+
+                    </label>
+
+
+                    <select
+                        id="selectPosition"
+                        class="custom-select"
+                        name="position"
+                        data-placeholder="Select Position"
+                        required>
+
+                        <option value=""></option>
+
+                        <option
+                            value="lecture"
+                            {% if form.position.value == "lecture" %}
+                                selected
+                            {% endif %}
+                        >
+                            Lecture
+                        </option>
+
+
+                        <option
+                            value="assistant"
+                            {% if form.position.value == "assistant" %}
+                                selected
+                            {% endif %}
+                        >
+                            Assistant
+                        </option>
+
+                    </select>
+
+
+                    {% if form.position.errors %}
+
+                        <div class="text-danger small mt-1">
+                            {{ form.position.errors }}
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Email -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="email"
+                        class="form-label fw-semibold">
+
+                        Email
+                        <span class="text-danger">*</span>
+
+                    </label>
+
+
+                    <input
+                        type="email"
+                        id="email"
+                        class="form-control"
+                        name="email"
+                        placeholder="Enter email"
+                        value="{{ form.email.value|default:'' }}"
+                        required>
+
+
+                    {% if form.email.errors %}
+
+                        <div class="text-danger small mt-1">
+                            {{ form.email.errors }}
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Phone -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="phone"
+                        class="form-label fw-semibold">
+
+                        Phone Number
+                        <span class="text-danger">*</span>
+
+                    </label>
+
+
+                    <input
+                        type="tel"
+                        class="form-control"
+                        id="phone"
+                        name="phone"
+                        placeholder="Enter phone number"
+                        value="{{ form.phone.value|default:'' }}"
+                        required>
+
+
+                    {% if form.phone.errors %}
+
+                        <div class="text-danger small mt-1">
+                            {{ form.phone.errors }}
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Buttons -->
+
+    <div class="d-flex justify-content-end mt-4">
+
+        <a
+            href="{% url 'teacher' %}"
+            class="btn btn-outline-danger me-2">
+
+            Cancel
+
+        </a>
+
+
+        <button
+            type="submit"
+            class="btn btn-outline-primary">
+
+            <i class="fa-solid fa-floppy-disk me-1"></i>
+
+            Save Teacher
+
+        </button>
+
+    </div>
+
+</form>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+
+const photoInput =
+    document.getElementById("photoInput");
+
+const previewImg =
+    document.getElementById("previewImg");
+
+const defaultIcon =
+    document.getElementById("defaultIcon");
+
+
+/* Photo Preview */
+
+photoInput.addEventListener(
+    "change",
+    function(event) {
+
+        const file =
+            event.target.files[0];
+
+        if (file) {
+
+            const reader =
+                new FileReader();
+
+            reader.onload =
+                function(e) {
+
+                    previewImg.src =
+                        e.target.result;
+
+                    previewImg.classList.remove(
+                        "d-none"
+                    );
+
+                    defaultIcon.classList.add(
+                        "d-none"
+                    );
+
+                };
+
+            reader.readAsDataURL(file);
+
+        }
+
+    }
+);
+
+
+/* Department */
+
+const departmentSelect =
+    document.getElementById("selectDepartment");
+
+
+/* Subject */
+
+const subjectSelect =
+    document.getElementById("selectSubject");
+
+
+/* TomSelect Department */
+
+const departmentTom =
+    new TomSelect(
+        departmentSelect,
+        {
+
+            placeholder:
+                departmentSelect.dataset.placeholder,
+
+            create: false,
+
+            sortField: {
+                field: "text",
+                direction: "asc"
+            },
+
+            onInitialize: function() {
+
+                if (this.control_input) {
+
+                    this.control_input.setAttribute(
+                        "readonly",
+                        true
+                    );
+
+                }
+
+            }
+
+        }
+    );
+
+
+/* TomSelect Subject */
+
+const subjectTom =
+    new TomSelect(
+        subjectSelect,
+        {
+
+            placeholder:
+                subjectSelect.dataset.placeholder,
+
+            create: false,
+
+            plugins: [
+                "remove_button"
+            ],
+
+            sortField: {
+                field: "text",
+                direction: "asc"
+            },
+
+            onInitialize: function() {
+
+                if (this.control_input) {
+
+                    this.control_input.setAttribute(
+                        "readonly",
+                        true
+                    );
+
+                }
+
+            }
+
+        }
+    );
+
+
+/* Load Subjects */
+
+function loadSubjects(deptId) {
+
+    subjectTom.clear();
+    subjectTom.clearOptions();
+
+    if (!deptId) {
+
+        return;
+
+    }
+
+
+    subjectTom.addOption({
+        value: "loading",
+        text: "Loading..."
+    });
+
+    subjectTom.refreshOptions(false);
+
+
+    fetch(
+        "{% url 'get_department_subjects' %}?dept_id=" + deptId
+    )
+
+    .then(response => {
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to load subjects"
+            );
+
+        }
+
+        return response.json();
+
+    })
+
+    .then(data => {
+
+        subjectTom.clear();
+        subjectTom.clearOptions();
+
+
+        data.forEach(function(subject) {
+
+            subjectTom.addOption({
+
+                value: subject.id,
+
+                text:
+                    subject.code +
+                    " - " +
+                    subject.name
+
+            });
+
+        });
+
+
+        subjectTom.refreshOptions(false);
+
+    })
+
+    .catch(error => {
+
+        console.error(error);
+
+        subjectTom.clear();
+        subjectTom.clearOptions();
+
+        subjectTom.addOption({
+
+            value: "error",
+
+            text: "Unable to load subjects"
+
+        });
+
+        subjectTom.refreshOptions(false);
+
+    });
+
+}
+
+
+/* Department Change */
+
+departmentTom.on(
+    "change",
+    function(value) {
+
+        loadSubjects(value);
+
+    }
+);
+
+
+/* Load Subjects if Department Already Selected */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        const selectedDept =
+            departmentSelect.value;
+
+        if (selectedDept) {
+
+            loadSubjects(selectedDept);
+
+        }
+
+    }
+);
+
+</script>
+
+{% endblock %}

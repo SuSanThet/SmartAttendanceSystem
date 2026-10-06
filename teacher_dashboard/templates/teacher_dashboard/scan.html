@@ -1,0 +1,268 @@
+{% extends 'teacher_dashboard/baseteacher.html' %}
+
+{% block title %}
+QR Scanner
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">
+                QR Attendance Scanner
+            </h3>
+        </div>
+
+        <div class="card-body">
+
+            <!-- Scanner -->
+
+            <div id="reader" style="width:500px; margin:auto;"></div>
+
+            <hr>
+
+
+            <!-- Current Student -->
+
+            <h4 class="text-center">
+
+                Student ID :
+
+                <span id="student_id" class="text-success">
+                    Waiting for Scan...
+                </span>
+
+            </h4>
+
+
+            <!-- Student Name -->
+
+            <h5 class="text-center mt-3">
+
+                <span id="student_name"></span>
+
+            </h5>
+
+
+            <!-- Result -->
+
+            <div
+                id="scan_result"
+                class="alert text-center mt-3"
+                style="display:none;"
+            >
+            </div>
+
+
+            <!-- Session Information -->
+
+            <div
+                id="session_info"
+                class="text-center mt-3"
+                style="display:none;"
+            >
+
+                <strong>Attendance Session</strong>
+
+                <div id="session_text"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+
+<script>
+
+function onScanSuccess(decodedText, decodedResult) {
+
+    // Prevent empty scan
+    if (!decodedText) {
+        return;
+    }
+
+
+    // Show scanned student ID immediately
+
+    document.getElementById(
+        "student_id"
+    ).innerText = decodedText;
+
+
+    // Send QR data to Django
+
+    fetch(
+        "{% url 'teacher_dashboard:scan' %}",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+
+                "X-CSRFToken": getCookie("csrftoken")
+            },
+
+            body: JSON.stringify({
+                student_id: decodedText
+            })
+        }
+    )
+
+    .then(response => response.json())
+
+    .then(data => {
+
+        const result =
+            document.getElementById("scan_result");
+
+        const name =
+            document.getElementById("student_name");
+
+
+        if (data.success) {
+
+            name.innerText =
+                data.student_name;
+
+
+            result.style.display = "block";
+
+            result.className =
+                "alert alert-success text-center mt-3";
+
+
+            result.innerHTML =
+                "✓ " + data.message;
+
+
+            /*
+            Session information
+            */
+
+            if (data.time_slot) {
+
+                document.getElementById(
+                    "session_info"
+                ).style.display = "block";
+
+
+                document.getElementById(
+    "session_text"
+).innerHTML =
+
+    data.subject +
+    " | " +
+    data.section +
+    " | " +
+    data.time_slot;
+
+            }
+
+        }
+
+        else {
+
+            name.innerText = "";
+
+            result.style.display = "block";
+
+            result.className =
+                "alert alert-danger text-center mt-3";
+
+            result.innerHTML =
+                "✖ " + data.message;
+
+        }
+
+    })
+
+    .catch(error => {
+
+        console.error(error);
+
+        const result =
+            document.getElementById("scan_result");
+
+        result.style.display = "block";
+
+        result.className =
+            "alert alert-danger text-center mt-3";
+
+        result.innerHTML =
+            "✖ Something went wrong.";
+
+    });
+
+}
+
+function getCookie(name) {
+
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== "") {
+
+        const cookies =
+            document.cookie.split(";");
+
+        for (
+            let i = 0;
+            i < cookies.length;
+            i++
+        ) {
+
+            const cookie =
+                cookies[i].trim();
+
+
+            if (
+                cookie.substring(
+                    0,
+                    name.length + 1
+                ) === (name + "=")
+            ) {
+
+                cookieValue =
+                    decodeURIComponent(
+                        cookie.substring(
+                            name.length + 1
+                        )
+                    );
+
+                break;
+            }
+
+        }
+
+    }
+
+    return cookieValue;
+}
+
+
+const html5QrCodeScanner =
+    new Html5QrcodeScanner(
+        "reader",
+        {
+            fps: 10,
+            qrbox: 250
+        },
+        false
+    );
+
+
+html5QrCodeScanner.render(
+    onScanSuccess
+);
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'admin_base.html' %}
+{% block title %}Delete Schedule Entry{% endblock %}
+
+{% block content %}
+<style>
+.form-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 36px 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.form-card h1 { font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 14px; }
+
+.form-card p {
+  font-size: 14px;
+  color: #475569;
+  background: #f8fafc;
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+
+.form-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+.btn-cancel {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-delete {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+</style>
+
+<div class="form-card">
+  <h1>Delete this schedule entry?</h1>
+  <p>
+    <strong>{{ schedule.class_group }}</strong><br>
+    {{ schedule.get_day_display }} &middot; {{ schedule.time_slot }}<br>
+    {{ schedule.subject.code }} with {{ schedule.teacher.name }}
+  </p>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="form-actions">
+      <a href="{% url 'schedule_list' %}" class="btn-cancel">Cancel</a>
+      <button type="submit" class="btn-delete">Delete</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

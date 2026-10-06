@@ -1,0 +1,344 @@
+{% extends 'student_dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<style>
+    /* Header Area */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .back-btn {
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: #334155;
+        cursor: pointer;
+    }
+
+    .page-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .notification-wrapper {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .notification-icon {
+        font-size: 20px;
+        color: #334155;
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #2563eb;
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Profile Card Container */
+    .profile-card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .profile-info-container {
+        display: flex;
+        align-items: flex-start;
+        gap: 50px;
+        margin-bottom: 30px;
+    }
+
+    /* Avatar Section */
+    .avatar-section {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .avatar-wrapper {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background-color: #f8fafc;
+    }
+
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #e2e8f0;
+    }
+
+    .camera-badge {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background-color: #092565;
+        color: white;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid white;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .camera-badge:hover {
+        transform: scale(1.1);
+    }
+
+    .delete-btn-small {
+        margin-top: 12px;
+        color: #ef4444;
+        background: none;
+        border: none;
+        font-size: 13px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .delete-btn-small:hover {
+        text-decoration: underline;
+    }
+
+    /* Details Rows */
+    .details-section {
+        flex-grow: 1;
+        width: 100%;
+    }
+
+    .detail-row {
+        display: flex;
+        padding: 14px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        width: 150px;
+        color: #475569;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    /* Edit Button */
+    .edit-profile-btn {
+        width: 100%;
+        background-color: #1d4ed8;
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .edit-profile-btn:hover {
+        background-color: #1e40af;
+    }
+
+    /* Modal (Edit Popup) Styling */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .modal-header h3 {
+        font-size: 18px;
+        color: #0f172a;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: #64748b;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        color: #475569;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .save-btn {
+        width: 100%;
+        background-color: #1d4ed8;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+</style>
+
+<!-- Top Navigation Row -->
+<div class="page-header">
+    <div class="header-left">
+        <button class="back-btn" onclick="history.back()"><i class="fa-solid fa-arrow-left"></i></button>
+        <h2 class="page-title">Profile</h2>
+    </div>
+    <div class="notification-wrapper">
+        <i class="fa-regular fa-bell notification-icon"></i>
+        <span class="notification-badge">3</span>
+    </div>
+</div>
+
+<!-- Main Profile Card -->
+<div class="profile-card">
+    <div class="profile-info-container">
+
+        <!-- Photo Section -->
+        <div class="avatar-section">
+            <div class="avatar-wrapper">
+                {% if profile.profile_pic %}
+                    <img src="{{ profile.profile_pic.url }}" alt="Avatar" class="avatar-img">
+                {% else %}
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ request.user.username|default:'student' }}" alt="Default Avatar" class="avatar-img">
+                {% endif %}
+
+                <!-- Camera Button for Image Change -->
+                <form method="POST" enctype="multipart/form-data" id="photoForm">
+                    {% csrf_token %}
+                    <label class="camera-badge" title="Change Photo" for="fileInput">
+                        <i class="fa-solid fa-camera"></i>
+                    </label>
+                    <input type="file" id="fileInput" name="profile_pic" accept="image/*" style="display: none;" onchange="document.getElementById('photoForm').submit();">
+                </form>
+            </div>
+
+            {% if profile.profile_pic %}
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" name="delete_pic" value="1" class="delete-btn-small">Remove Photo</button>
+                </form>
+            {% endif %}
+        </div>
+
+        <!-- Info Details -->
+        <div class="details-section">
+            <div class="detail-row">
+                <span class="detail-label">Full Name</span>
+                <span class="detail-value">{{ student.name }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Username</span>
+                <span class="detail-value">{{ request.user.username }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Email</span>
+                <span class="detail-value">{{student.email|default:"admin@gmail.com" }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Class</span>
+                <span class="detail-value">{{ student.section|default:"101" }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">ID</span>
+                <span class="detail-value">{{ student.ID|default:"22686" }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Phone</span>
+                <span class="detail-value">{{ student.phone|default:"0978123456" }}</span>
+            </div>
+            <a href="{% url 'accounts:change_password' %}"
+   class="btn btn-outline-danger btn-sm px-3">
+
+    <i class="bi bi-key me-1"></i>
+    Change Password
+
+            </a>
+        </div>
+
+    </div>
+
+{% endblock %}

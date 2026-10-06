@@ -1,0 +1,937 @@
+{% extends 'teacher_dashboard/baseteacher.html' %}
+
+{% block content %}
+
+<style>
+
+    .main-content {
+        display: block !important;
+        width: 100% !important;
+        padding: 30px !important;
+    }
+
+    .page-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .breadcrumb {
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 24px;
+    }
+
+    /* Summary */
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .stat-box {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 18px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+
+    .stat-box p {
+        font-size: 11px;
+        color: #64748b;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0;
+    }
+
+    .stat-box h3 {
+        font-size: 24px;
+        margin-top: 6px;
+        color: #0f172a;
+        margin-bottom: 0;
+    }
+
+    .stat-box h3.blue {
+        color: #2563eb;
+    }
+
+    .stat-box h3.green {
+        color: #10b981;
+    }
+
+    .stat-box h3.red {
+        color: #ef4444;
+    }
+
+    .stat-box h3.orange {
+        color: #f59e0b;
+    }
+
+    /* Main Card */
+
+    .card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Filter */
+
+    .filter-bar {
+        display: flex;
+        align-items: flex-end;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 13px;
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .form-control {
+        padding: 9px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 13px;
+        outline: none;
+        background-color: #ffffff;
+    }
+
+    .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 2px rgba(37,99,235,0.08);
+    }
+
+    .btn-filter {
+        background: #1d4ed8;
+        color: white;
+        border: none;
+        padding: 9px 20px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-filter:hover {
+        background: #1e40af;
+    }
+
+    .btn-reset {
+        background: white;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 9px 20px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .btn-reset:hover {
+        background: #f8fafc;
+    }
+
+    /* Table */
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        min-width: 1000px;
+    }
+
+    .data-table th {
+        text-align: left;
+        padding: 12px 14px;
+        font-size: 12px;
+        color: #64748b;
+        border-bottom: 2px solid #e2e8f0;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .data-table td {
+        padding: 14px;
+        font-size: 13px;
+        color: #1e293b;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    .data-table tr:hover {
+        background-color: #f8fafc;
+    }
+
+    /* Student */
+
+    .student-id {
+        font-weight: 700;
+        color: #64748b;
+    }
+
+    .student-name {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    /* Status */
+
+    .badge {
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    .badge.present {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge.absent {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge.late {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge.unknown {
+        background-color: #e2e8f0;
+        color: #475569;
+    }
+
+    /* Method */
+
+    .method-badge {
+        padding: 5px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .method-manual {
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
+    .method-qr {
+        background: #f0fdf4;
+        color: #15803d;
+    }
+
+    .method-none {
+        color: #94a3b8;
+    }
+
+    /* Empty */
+
+    .empty-row {
+        text-align: center;
+        padding: 50px !important;
+        color: #64748b !important;
+    }
+
+    /* Pagination */
+
+    .table-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 6px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .pagination a {
+        padding: 6px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        color: #334155;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .pagination a:hover {
+        background: #f8fafc;
+    }
+
+    .pagination a.active {
+        background: #1d4ed8;
+        color: white;
+        border-color: #1d4ed8;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 1100px) {
+
+        .summary-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+    }
+
+    @media (max-width: 900px) {
+
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+    }
+
+    @media (max-width: 600px) {
+
+        .main-content {
+            padding: 15px !important;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .table-footer {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+    }
+
+</style>
+
+
+<!-- =====================================================
+     TITLE
+===================================================== -->
+
+<div class="page-title">
+    Attendance History
+</div>
+
+<div class="breadcrumb">
+    Dashboard &gt; Attendance History
+</div>
+
+
+<!-- =====================================================
+     SUMMARY
+===================================================== -->
+
+<div class="summary-grid">
+
+    <!-- CLASS SESSIONS -->
+
+    <div class="stat-box">
+
+        <p>
+            Total Class Sessions
+        </p>
+
+        <h3 class="blue">
+            {{ total_sessions }}
+        </h3>
+
+    </div>
+
+
+    <!-- EXPECTED -->
+
+    <div class="stat-box">
+
+        <p>
+            Expected Attendance
+        </p>
+
+        <h3>
+            {{ total_expected }}
+        </h3>
+
+    </div>
+
+
+    <!-- PRESENT -->
+
+    <div class="stat-box">
+
+        <p>
+            Total Present
+        </p>
+
+        <h3 class="green">
+            {{ total_present }}
+        </h3>
+
+    </div>
+
+
+    <!-- ABSENT -->
+
+    <div class="stat-box">
+
+        <p>
+            Total Absent
+        </p>
+
+        <h3 class="red">
+            {{ total_absent }}
+        </h3>
+
+    </div>
+
+
+    <!-- LATE -->
+
+    <div class="stat-box">
+
+        <p>
+            Total Late
+        </p>
+
+        <h3 class="orange">
+            {{ total_late }}
+        </h3>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MAIN CARD
+===================================================== -->
+
+<div class="card">
+
+
+    <!-- =================================================
+         FILTER
+    ================================================= -->
+
+    <form
+        method="GET"
+        class="filter-bar"
+    >
+
+        <!-- CLASS -->
+
+        <div class="filter-group">
+
+            <label>
+                Select Class
+            </label>
+
+            <select
+                name="class_name"
+                class="form-control"
+            >
+
+                <option value="">
+                    All Classes
+                </option>
+
+                {% for class_group in class_groups %}
+
+                    <option
+                        value="{{ class_group.id }}"
+                        {% if selected_class == class_group.id|stringformat:"s" %}
+                            selected
+                        {% endif %}
+                    >
+
+                        {{ class_group }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <!-- FROM DATE -->
+
+        <div class="filter-group">
+
+            <label>
+                From Date
+            </label>
+
+            <input
+                type="date"
+                name="from_date"
+                class="form-control"
+                value="{{ from_date }}"
+            >
+
+        </div>
+
+
+        <!-- TO DATE -->
+
+        <div class="filter-group">
+
+            <label>
+                To Date
+            </label>
+
+            <input
+                type="date"
+                name="to_date"
+                class="form-control"
+                value="{{ to_date }}"
+            >
+
+        </div>
+
+
+        <!-- FILTER BUTTON -->
+
+        <button
+            type="submit"
+            class="btn-filter"
+        >
+
+            <i class="fa-solid fa-filter"></i>
+
+            Filter History
+
+        </button>
+
+
+        <!-- RESET -->
+
+        {% if selected_class or from_date or to_date %}
+
+            <a
+                href="{% url 'teacher_dashboard:attendance_history' %}"
+                class="btn-reset"
+            >
+
+                Reset
+
+            </a>
+
+        {% endif %}
+
+    </form>
+
+
+    <!-- =================================================
+         TABLE
+    ================================================= -->
+
+    <div class="table-wrapper">
+
+        <table class="data-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        #
+                    </th>
+
+                    <th>
+                        Date
+                    </th>
+
+                    <th>
+                        Roll No
+                    </th>
+
+                    <th>
+                        Student Name
+                    </th>
+
+                    <th>
+                        Class
+                    </th>
+
+                    <th>
+                        Subject
+                    </th>
+
+                    <th>
+                        Time
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Method
+                    </th>
+
+                    <th>
+                        Remark
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for item in page_obj %}
+
+                    <tr>
+
+                        <!-- NUMBER -->
+
+                        <td>
+                            {{ forloop.counter|add:page_obj.start_index|add:"-1" }}
+                        </td>
+
+
+                        <!-- DATE -->
+
+                        <td>
+
+                            <strong>
+                                {{ item.date|date:"d-m-Y" }}
+                            </strong>
+
+                        </td>
+
+
+                        <!-- STUDENT ID -->
+
+                        <td class="student-id">
+
+                            {{ item.student.ID }}
+
+                        </td>
+
+
+                        <!-- STUDENT NAME -->
+
+                        <td class="student-name">
+
+                            {{ item.student.name }}
+
+                        </td>
+
+
+                        <!-- CLASS -->
+
+                        <td>
+
+                            {% if item.schedule.class_group %}
+
+                                {{ item.schedule.class_group }}
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- SUBJECT -->
+
+                        <td>
+
+                            {% if item.schedule.subject %}
+
+                                <strong>
+                                    {{ item.schedule.subject.code }}
+                                </strong>
+
+                                {% if item.schedule.subject.name %}
+
+                                    -
+                                    {{ item.schedule.subject.name }}
+
+                                {% endif %}
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- TIME -->
+
+                        <td>
+
+                            {% if item.schedule.time_slot %}
+
+                                {{ item.schedule.time_slot }}
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- STATUS -->
+
+                        <td>
+
+                            {% if item.status == "PRESENT" %}
+
+                                <span class="badge present">
+                                    ✔ Present
+                                </span>
+
+                            {% elif item.status == "ABSENT" %}
+
+                                <span class="badge absent">
+                                    ✖ Absent
+                                </span>
+
+                            {% elif item.status == "LATE" %}
+
+                                <span class="badge late">
+                                    ⏰ Late
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge unknown">
+                                    {{ item.status }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- METHOD -->
+
+                        <td>
+
+                            {% if item.method == "MANUAL" %}
+
+                                <span class="method-badge method-manual">
+                                    Manual
+                                </span>
+
+                            {% elif item.method == "QR" %}
+
+                                <span class="method-badge method-qr">
+                                    QR Scan
+                                </span>
+
+                            {% else %}
+
+                                <span class="method-none">
+                                    -
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- REMARK -->
+
+                        <td>
+
+                            {% if item.remark %}
+
+                                {{ item.remark }}
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="10"
+                            class="empty-row"
+                        >
+
+                            <i class="fa-solid fa-calendar-xmark fa-2x mb-2"></i>
+
+                            <br>
+
+                            No attendance history found.
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- =================================================
+         FOOTER / PAGINATION
+    ================================================= -->
+
+    <div class="table-footer">
+
+
+        <!-- RECORD COUNT -->
+
+        <div>
+
+            {% if total_count > 0 %}
+
+                Showing
+                <strong>
+                    {{ page_obj.start_index }}
+                </strong>
+
+                to
+
+                <strong>
+                    {{ page_obj.end_index }}
+                </strong>
+
+                of
+
+                <strong>
+                    {{ total_count }}
+                </strong>
+
+                records
+
+            {% else %}
+
+                Showing 0 records
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- PAGINATION -->
+
+        {% if page_obj.paginator.num_pages > 1 %}
+
+            <ul class="pagination">
+
+
+                <!-- PREVIOUS -->
+
+                {% if page_obj.has_previous %}
+
+                    <li>
+
+                        <a
+                            href="?class_name={{ selected_class }}&from_date={{ from_date }}&to_date={{ to_date }}&page={{ page_obj.previous_page_number }}"
+                        >
+
+                            &laquo;
+
+                        </a>
+
+                    </li>
+
+                {% endif %}
+
+
+                <!-- PAGE NUMBERS -->
+
+                {% for num in page_obj.paginator.page_range %}
+
+                    <li>
+
+                        <a
+                            href="?class_name={{ selected_class }}&from_date={{ from_date }}&to_date={{ to_date }}&page={{ num }}"
+                            class="{% if page_obj.number == num %}active{% endif %}"
+                        >
+
+                            {{ num }}
+
+                        </a>
+
+                    </li>
+
+                {% endfor %}
+
+
+                <!-- NEXT -->
+
+                {% if page_obj.has_next %}
+
+                    <li>
+
+                        <a
+                            href="?class_name={{ selected_class }}&from_date={{ from_date }}&to_date={{ to_date }}&page={{ page_obj.next_page_number }}"
+                        >
+
+                            &raquo;
+
+                        </a>
+
+                    </li>
+
+                {% endif %}
+
+
+            </ul>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

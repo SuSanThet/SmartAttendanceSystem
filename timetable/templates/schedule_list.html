@@ -1,0 +1,178 @@
+{% extends 'admin_dashboard/base.html' %}
+{% block title %}All Schedules{% endblock %}
+
+{% block content %}
+<style>
+.list-wrapper {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.page-header { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; }
+.page-title { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+.breadcrumbs { font-size: 13px; color: #64748b; }
+.breadcrumbs a { color: #64748b; text-decoration: none; }
+
+.btn-add-new {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #f8fafc;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.filter-bar select {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #ffffff;
+}
+
+.btn-apply {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn-clear {
+  color: #64748b;
+  font-size: 13px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.schedule-table { width: 100%; border-collapse: collapse; }
+
+.schedule-table th {
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.schedule-table td {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.empty-row { text-align: center; color: #94a3b8; padding: 30px !important; }
+
+.btn-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  text-decoration: none;
+  margin-right: 6px;
+}
+
+.btn-icon-danger { color: #dc2626; border-color: #fca5a5; }
+</style>
+
+<div class="list-wrapper">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">All Schedules</h1>
+      <div class="breadcrumbs"><a href="{% url 'schedule_builder' %}">Schedule Builder</a> &gt; <span>All Schedules</span></div>
+    </div>
+    <a href="{% url 'schedule_add' %}" class="btn-add-new"><i class="fa-solid fa-plus"></i> Add Schedule</a>
+  </div>
+
+  <form method="GET" class="filter-bar">
+    <select name="year">
+      <option value="">All Years</option>
+      {% for val, label in years %}
+        <option value="{{ val }}" {% if filters.year == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="department">
+      <option value="">All Departments</option>
+      {% for d in departments %}
+        <option value="{{ d.id }}" {% if filters.department == d.id|stringformat:"s" %}selected{% endif %}>{{ d.short_code }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="day">
+      <option value="">All Days</option>
+      {% for val, label in days %}
+        <option value="{{ val }}" {% if filters.day == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="teacher">
+      <option value="">All Teachers</option>
+      {% for t in teachers %}
+        <option value="{{ t.id }}" {% if filters.teacher == t.id|stringformat:"s" %}selected{% endif %}>{{ t.full_name }}</option>
+      {% endfor %}
+    </select>
+
+    <button type="submit" class="btn-apply">Apply</button>
+    <a href="{% url 'schedule_list' %}" class="btn-clear">Clear</a>
+  </form>
+
+  <table class="schedule-table">
+    <thead>
+      <tr>
+        <th>Class</th><th>Day</th><th>Time</th><th>Subject</th><th>Teacher</th><th>Room</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in schedules %}
+      <tr>
+        <td>{{ s.class_group }}</td>
+        <td>{{ s.get_day_display }}</td>
+        <td>{{ s.time_slot }}</td>
+        <td>{{ s.subject.code }}</td>
+        <td>{{ s.teacher.full_name }}</td>
+        <td>{{ s.room|default:"-" }}</td>
+        <td>
+          <a href="{% url 'schedule_edit' s.id %}" class="btn-icon" title="Edit"><i class="fa-solid fa-pen"></i></a>
+          <a href="{% url 'schedule_delete' s.id %}" class="btn-icon btn-icon-danger" title="Delete"><i class="fa-solid fa-trash"></i></a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="empty-row">No schedule entries match these filters.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

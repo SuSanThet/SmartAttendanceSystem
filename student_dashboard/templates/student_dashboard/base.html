@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Student Portal{% endblock %}</title>
+
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Fixed Sidebar Layout */
+        .sidebar {
+            width: 250px;
+            min-width: 250px;
+            background-color: #031b4e;
+            color: white;
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            padding-left: 10px;
+            color: #ffffff;
+        }
+
+        .menu-list { list-style: none; }
+        .menu-list li { margin-bottom: 8px; }
+        .menu-list a {
+            color: #94a3b8;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .menu-list a.active, .menu-list a:hover {
+            background-color: #1d4ed8;
+            color: #ffffff;
+        }
+
+        /* User Profile Footer in Sidebar */
+        .user-profile-footer {
+            background-color: #092565;
+            padding: 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: #cbd5e1;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .user-meta { overflow: hidden; }
+        .user-meta h4 {
+            font-size: 13px;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0;
+        }
+
+        .user-meta p {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+            margin-bottom: 0;
+        }
+
+        /* Right Side Area Wrapper */
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            width: calc(100% - 250px);
+            min-height: 100vh;
+        }
+
+        /* Top Navigation Header */
+        .top-navbar {
+            padding: 14px 40px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-user-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .notification-btn {
+            position: relative;
+            background: #f1f5f9;
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #475569;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background-color: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 30px 40px;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- SIDEBAR AREA -->
+    <aside class="sidebar">
+        <div>
+            <div class="brand">SMART ATTENDANCE SYSTEM</div>
+            <ul class="menu-list">
+                <li>
+                    <a href="{% url 'student_dashboard:student_dashboard' %}" class="{% if request.resolver_match.url_name == 'student_dashboard' %}active{% endif %}">
+                       <i class="fa-solid fa-gauge"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'student_dashboard:myqr' %}" class="{% if request.resolver_match.url_name == 'myqr' %}active{% endif %}">
+                        <i class="bi bi-qr-code-scan"></i> My QR
+                    </a>
+                </li>
+                 <li>
+                    <a href="{% url 'student_dashboard:mysection' %}" class="{% if request.resolver_match.url_name == 'my_attendance' %}active{% endif %}">
+                        <i class="fa-solid fa-address-card"></i>my Section
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'student_dashboard:my_attendance' %}" class="{% if request.resolver_match.url_name == 'my_attendance' %}active{% endif %}">
+                        <i class="fa-solid fa-map"></i>My Attendance
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'student_dashboard:leave_request' %}" class="{% if request.resolver_match.url_name == 'my_attendance' %}active{% endif %}">
+                         <i class="fa-solid fa-calendar-minus"></i> my leave request
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'student_dashboard:attendance_statistics' %}" class="{% if request.resolver_match.url_name == 'attendance_statistics' %}active{% endif %}">
+                        <i class="fa-solid fa-chart-line"></i> Attendance Statistics
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'student_dashboard:profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                        <i class="fa-solid fa-user"></i> Profile
+                    </a>
+                </li>
+                <li>
+                    <form action="{% url 'accounts:logout' %}" method="post" id="logout-form-sidebar">
+                        {% csrf_token %}
+                        <a href="#" onclick="document.getElementById('logout-form-sidebar').submit(); return false;">
+                          <i class="fa-solid fa-right-from-bracket"></i> Logout
+                        </a>
+                    </form>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Sidebar User Footer -->
+        <div class="user-profile-footer">
+            <div class="user-avatar">
+                {% if request.user.profile.profile_pic %}
+                    <img src="{{ request.user.profile.profile_pic.url }}?v={{ request.user.profile.profile_pic.name }}" alt="Avatar">
+                {% elif request.user.student_profile.profile_pic %}
+                    <img src="{{ request.user.student_profile.profile_pic.url }}?v={{ request.user.student_profile.profile_pic.name }}" alt="Avatar">
+                {% elif profile.profile_pic %}
+                    <img src="{{ profile.profile_pic.url }}?v={{ profile.profile_pic.name }}" alt="Avatar">
+                {% else %}
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ request.user.username|default:'student' }}" alt="Default Avatar">
+                {% endif %}
+            </div>
+            <div class="user-meta">
+                <h4>{{ request.user.get_full_name|default:request.user.username }}</h4>
+                <p>
+                    {% if request.user.profile.student_class %}
+                        Class {{ request.user.profile.student_class }} • Roll {{ request.user.profile.roll_number }}
+                    {% elif request.user.student_profile.student_class %}
+                        Class {{ request.user.student_profile.student_class }} • Roll {{ request.user.student_profile.roll_number }}
+                    {% else %}
+                        Student Profile
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN WRAPPER AREA -->
+    <div class="main-wrapper">
+
+        <!-- Top Header Navigation -->
+        <header class="top-navbar">
+            <h4 class="m-0 fw-bold">{% block page_title %}Student Portal{% endblock %}</h4>
+
+            <!-- Notification Bell & Profile Dropdown -->
+            <div class="d-flex align-items-center gap-3">
+
+
+                <!-- User Avatar & Dropdown -->
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center gap-2 text-decoration-none dropdown-toggle text-dark" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if request.user.profile.profile_pic %}
+                            <img src="{{ request.user.profile.profile_pic.url }}?v={{ request.user.profile.profile_pic.name }}" class="top-user-avatar" alt="Avatar">
+                        {% elif request.user.student_profile.profile_pic %}
+                            <img src="{{ request.user.student_profile.profile_pic.url }}?v={{ request.user.student_profile.profile_pic.name }}" class="top-user-avatar" alt="Avatar">
+                        {% elif profile.profile_pic %}
+                            <img src="{{ profile.profile_pic.url }}?v={{ profile.profile_pic.name }}" class="top-user-avatar" alt="Avatar">
+                        {% else %}
+                            <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ request.user.username|default:'student' }}" class="top-user-avatar" alt="Default Avatar">
+                        {% endif %}
+
+                        <div class="d-flex flex-column text-start me-1">
+                            <span class="fw-semibold lh-1" style="font-size: 14px;">
+                                {{ request.user.get_full_name|default:request.user.username }}
+                            </span>
+                            <span class="text-muted mt-1" style="font-size: 11px; line-height: 1;">
+                                {{ request.user.email|default:"student@school.edu" }}
+                            </span>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="profileDropdown">
+                    <li><a href="{% url 'emails:student_email_home' %}" class="dropdown-item"><i class="bi bi-envelope me-2"></i>Mail</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                            <form action="{% url 'accounts:logout' %}" method="post" id="logout-form-header" style="display: none;">
+                                {% csrf_token %}
+                            </form>
+                            <a class="dropdown-item text-danger" href="#" onclick="document.getElementById('logout-form-header').submit(); return false;">
+                                <i class="bi bi-box-arrow-right me-2"></i> Logout
+                            </a>
+                    </li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            {% block content %}
+            <!-- Content will be injected here -->
+            {% endblock %}
+        </main>
+
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+

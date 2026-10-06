@@ -1,0 +1,161 @@
+{% extends 'teacher_dashboard/baseteacher.html' %}
+
+{% block title %}Teacher Profile{% endblock %}
+
+{% block content %}
+<style>
+    .profile-card {
+        background-color: #ffffff;
+        border-radius: 16px;
+        padding: 50px 60px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        width: 100%;
+        max-width: 850px;
+    }
+
+    .profile-flex {
+        display: flex;
+        align-items: center;
+        gap: 60px;
+    }
+
+    /* Avatar Container */
+    .avatar-wrapper {
+        position: relative;
+        width: 160px;
+        height: 160px;
+        flex-shrink: 0;
+    }
+
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: #f1f5f9;
+        border: 2px solid #e2e8f0;
+    }
+
+    /* Camera Upload Badge */
+    .camera-badge {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background-color: #081a36;
+        color: #ffffff;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        border: 3px solid #ffffff;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .camera-badge:hover {
+        transform: scale(1.08);
+    }
+
+    .camera-badge input[type="file"] {
+        display: none;
+    }
+
+    /* Form Table Details */
+    .details-table {
+        width: 100%;
+    }
+
+    .detail-row {
+        display: flex;
+        padding: 16px 0;
+        border-bottom: 1px dashed #e2e8f0;
+        font-size: 16px;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        width: 160px;
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .detail-value {
+        color: #0f172a;
+        font-weight: 500;
+    }
+</style>
+
+<div class="profile-card">
+    <form method="POST" enctype="multipart/form-data" id="teacherProfileForm">
+        {% csrf_token %}
+
+        <div class="profile-flex">
+            <!-- Profile Avatar with Upload -->
+            <div class="avatar-wrapper">
+                {% if profile.profile_pic %}
+                    <img src="{{ profile.profile_pic.url }}" alt="Profile Picture" class="avatar-img">
+                {% else %}
+                    <!-- Uses a clean default avatar icon if no picture is uploaded yet -->
+                    <img src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:'Daw+Hla' }}&background=081a36&color=ffffff&size=160" alt="Default Avatar" class="avatar-img">
+                {% endif %}
+
+                <label class="camera-badge" for="id_profile_pic" title="Upload Photo">
+                    <i class="fa-solid fa-camera"></i>
+                    <input type="file" name="profile_pic" id="id_profile_pic" accept="image/*" onchange="document.getElementById('teacherProfileForm').submit();">
+                </label>
+            </div>
+            {% if profile.profile_pic %}
+                <form method="POST" id="deletePicForm">
+                    {% csrf_token %}
+                    <button type="submit" name="delete_pic" value="1" class="delete-badge" title="Remove Photo" onclick="return confirm('Are you sure you want to delete your profile photo?');">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+
+            <!-- Details List -->
+            <div class="details-table">
+                <div class="detail-row">
+                    <span class="detail-label">Full Name</span>
+                    <span class="detail-value">{{teacher.name}}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Username</span>
+                    <span class="detail-value">{{ request.user.username|default:"dawhla" }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Email</span>
+                    <span class="detail-value">{{ teacher.email|default:"dawhla@example.com" }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Department</span>
+                    <span class="detail-value">{{ teacher.dept|default:"Science & Math" }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Phone</span>
+                    <span class="detail-value">{{ teacher.phone|default:"0912345678" }}</span>
+                </div>
+                <a href="{% url 'accounts:change_password' %}"
+   class="btn btn-outline-danger btn-sm px-3">
+
+    <i class="bi bi-key me-1"></i>
+    Change Password
+
+            </a>
+            </div>
+
+
+    </form>
+</div>
+{% endblock %}

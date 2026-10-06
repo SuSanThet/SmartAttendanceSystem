@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Admin Portal{% endblock %}</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="" type="text/javascript"></script>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.sidebar {
+  width: 260px;
+  background-color: #081a36;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 30px 20px;
+  flex-shrink: 0;
+}
+
+.brand-title {
+  font-size: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 1.3;
+  margin-bottom: 40px;
+  color: #ffffff;
+}
+
+.nav-menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.nav-item a {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-item a:hover, .nav-item.active a {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-role {
+  background-color: #0d2347;
+  padding: 12px 15px;
+  border-radius: 12px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 40px;
+  width: 100%;
+}
+
+.messages { max-width: 1300px; margin: 0 auto 20px auto; }
+
+.alert {
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.alert-success { background: #dcfce7; color: #15803d; }
+.alert-error, .alert-danger { background: #fee2e2; color: #b91c1c; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div>
+    <div class="brand-title">SMART ATTENDANCE<br>SYSTEM</div>
+    <ul class="nav-menu">
+      <li class="nav-item {% if request.resolver_match.url_name == 'schedule_builder' %}active{% endif %}">
+        <a href="{% url 'schedule_builder' %}"><i class="fa-solid fa-table-cells"></i> Schedule Builder</a>
+      </li>
+      <li class="nav-item {% if request.resolver_match.url_name == 'schedule_list' %}active{% endif %}">
+        <a href="{% url 'schedule_list' %}"><i class="fa-solid fa-list"></i> All Schedules</a>
+      </li>
+      <li class="nav-item">
+        <a href="/admin/"><i class="fa-solid fa-database"></i> Manage Data</a>
+      </li>
+      <li class="nav-item">
+        <a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      </li>
+    </ul>
+  </div>
+  <div class="sidebar-role">Logged in as Admin</div>
+</aside>
+
+<main class="main-content">
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% block content %}
+  {% endblock %}
+</main>
+
+</body>
+</html>

@@ -1,0 +1,718 @@
+{% extends 'teacher_dashboard/baseteacher.html' %}
+
+{% block title %}Take Attendance{% endblock %}
+
+{% block content %}
+
+<style>
+
+.attendance-wrapper {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Header */
+
+.page-header {
+    margin-bottom: 25px;
+}
+
+.page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 5px;
+}
+
+.breadcrumbs {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.breadcrumbs a {
+    color: #64748b;
+    text-decoration: none;
+}
+
+/* Information Card */
+
+.info-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+
+    background: #f8fafc;
+
+    padding: 18px 20px;
+
+    border-radius: 10px;
+
+    margin-bottom: 20px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.info-value {
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 6px;
+
+    padding: 7px 12px;
+
+    font-size: 13px;
+
+    color: #1e293b;
+
+    font-weight: 600;
+}
+
+/* Date Filter */
+
+.filter-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    background: #f8fafc;
+
+    padding: 15px 20px;
+
+    border-radius: 10px;
+
+    margin-bottom: 25px;
+
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.filter-control {
+    padding: 8px 14px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    background: #ffffff;
+}
+
+.btn-load {
+    background: #2563eb;
+
+    color: #ffffff;
+
+    border: none;
+
+    padding: 8px 18px;
+
+    border-radius: 6px;
+
+    font-weight: 600;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    text-decoration: none;
+}
+
+.btn-load:hover {
+    background: #1d4ed8;
+}
+
+/* Manual Button */
+
+.btn-manual {
+    background: #ffffff;
+
+    color: #2563eb;
+
+    border: 1px solid #2563eb;
+
+    padding: 8px 18px;
+
+    border-radius: 6px;
+
+    font-weight: 600;
+
+    font-size: 14px;
+
+    text-decoration: none;
+}
+
+.btn-manual:hover {
+    background: #eff6ff;
+}
+
+/* Table */
+
+.attendance-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    margin-bottom: 25px;
+}
+
+.attendance-table th {
+    text-align: left;
+
+    padding: 12px 16px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    color: #475569;
+
+    border-bottom: 2px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+.attendance-table td {
+    padding: 14px 16px;
+
+    font-size: 14px;
+
+    color: #1e293b;
+
+    border-bottom: 1px solid #f1f5f9;
+
+    vertical-align: middle;
+}
+
+.roll-no {
+    font-weight: 600;
+
+    color: #64748b;
+}
+
+/* Status */
+
+.status-select {
+    padding: 6px 12px;
+
+    border-radius: 6px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    border: 1px solid transparent;
+
+    cursor: pointer;
+
+    outline: none;
+}
+
+.status-select.present {
+    background: #dcfce7;
+
+    color: #15803d;
+
+    border-color: #bbf7d0;
+}
+
+.status-select.absent {
+    background: #fee2e2;
+
+    color: #b91c1c;
+
+    border-color: #fca5a5;
+}
+
+.status-select.late {
+    background: #fef3c7;
+
+    color: #b45309;
+
+    border-color: #fde68a;
+}
+
+/* Remark */
+
+.remark-input {
+    border: 1px solid #e2e8f0;
+
+    border-radius: 6px;
+
+    padding: 7px 10px;
+
+    font-size: 13px;
+
+    width: 100%;
+
+    max-width: 220px;
+
+    outline: none;
+}
+
+.remark-input:focus {
+    border-color: #94a3b8;
+}
+
+/* Bottom */
+
+.table-actions {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+}
+
+.btn-mark-all {
+    background: #ffffff;
+
+    color: #2563eb;
+
+    border: 1px solid #2563eb;
+
+    padding: 10px 18px;
+
+    border-radius: 6px;
+
+    font-weight: 600;
+
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+.btn-mark-all:hover {
+    background: #eff6ff;
+}
+
+.btn-save {
+    background: #16a34a;
+
+    color: #ffffff;
+
+    border: none;
+
+    padding: 10px 24px;
+
+    border-radius: 6px;
+
+    font-weight: 600;
+
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+.btn-save:hover {
+    background: #15803d;
+}
+
+/* Empty */
+
+.empty-message {
+    text-align: center;
+
+    padding: 35px;
+
+    color: #64748b;
+}
+
+</style>
+
+
+<div class="attendance-wrapper">
+
+    <!-- Header -->
+
+    <div class="page-header">
+
+        <h1 class="page-title">
+            Take Attendance
+        </h1>
+
+        <div class="breadcrumbs">
+
+            <a href="{% url 'teacher_dashboard:teacher_dashboard' %}">
+                Dashboard
+            </a>
+
+            &gt;
+
+            <span>Take Attendance</span>
+
+        </div>
+
+    </div>
+
+
+    <!-- Schedule Information -->
+
+    {% if schedule %}
+
+    <div class="info-card">
+
+        <div class="info-item">
+
+            <span class="info-label">
+                Subject
+            </span>
+
+            <span class="info-value">
+                {{ schedule.subject.code }}
+            </span>
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span class="info-label">
+                Class
+            </span>
+
+            <span class="info-value">
+                {{ schedule.class_group }}
+            </span>
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span class="info-label">
+                Day
+            </span>
+
+            <span class="info-value">
+                {{ schedule.get_day_display }}
+            </span>
+
+        </div>
+
+
+        <div class="info-item">
+
+            <span class="info-label">
+                Time
+            </span>
+
+            <span class="info-value">
+                {{ schedule.time_slot }}
+            </span>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- Date -->
+
+    <form method="GET" class="filter-card">
+
+        <div class="filter-group">
+
+            <label for="date_select">
+                Date
+            </label>
+
+            <input
+                type="date"
+                name="date"
+                id="date_select"
+                class="filter-control"
+                value="{{ attendance_date|date:'Y-m-d' }}"
+                required
+            >
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="btn-load">
+
+            Load Students
+
+        </button>
+
+
+        {% if schedule %}
+
+        <a
+            href="{% url 'teacher_dashboard:manual_attendance' %}?section_id={{ schedule.class_group.section.id }}&schedule_id={{ schedule.id }}&attendance_date={{ attendance_date|date:'Y-m-d' }}"
+            class="btn-manual">
+
+            Manual Attendance
+
+        </a>
+
+        {% endif %}
+
+    </form>
+
+
+    <!-- Attendance Form -->
+
+    {% if schedule %}
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+
+        <input
+            type="hidden"
+            name="attendance_date"
+            value="{{ attendance_date|date:'Y-m-d' }}"
+        >
+
+
+        <table class="attendance-table">
+
+            <thead>
+
+                <tr>
+
+                    <th style="width: 15%;">
+                        Student ID
+                    </th>
+
+                    <th style="width: 30%;">
+                        Student Name
+                    </th>
+
+                    <th style="width: 25%;">
+                        Status
+                    </th>
+
+                    <th style="width: 30%;">
+                        Remark
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            {% for item in students %}
+
+                <tr>
+
+                    <!-- Student ID -->
+
+                    <td class="roll-no">
+
+                        {{ item.student.ID }}
+
+                    </td>
+
+
+                    <!-- Student Name -->
+
+                    <td>
+
+                        {{ item.student.name }}
+
+                    </td>
+
+
+                    <!-- Status -->
+
+                    <td>
+
+                        <select
+                            name="status_{{ item.student.ID }}"
+                            class="status-select
+                            {% if item.status == 'ABSENT' %}
+                                absent
+                            {% elif item.status == 'LATE' %}
+                                late
+                            {% else %}
+                                present
+                            {% endif %}"
+                            onchange="updateBadgeColor(this)"
+                        >
+
+                            <option
+                                value="PRESENT"
+                                {% if item.status == 'PRESENT' or not item.status %}
+                                    selected
+                                {% endif %}
+                            >
+                                ✔ Present
+                            </option>
+
+
+                            <option
+                                value="ABSENT"
+                                {% if item.status == 'ABSENT' %}
+                                    selected
+                                {% endif %}
+                            >
+                                ✖ Absent
+                            </option>
+
+
+                            <option
+                                value="LATE"
+                                {% if item.status == 'LATE' %}
+                                    selected
+                                {% endif %}
+                            >
+                                🕒 Late
+                            </option>
+
+                        </select>
+
+                    </td>
+
+
+                    <!-- Remark -->
+
+                    <td>
+
+                        <input
+                            type="text"
+                            name="remark_{{ item.student.ID }}"
+                            class="remark-input"
+
+                            value="{{ item.remark }}"
+                            placeholder="-"
+                        >
+
+                    </td>
+
+                </tr>
+
+
+            {% empty %}
+
+                <tr>
+
+                    <td
+                        colspan="4"
+                        class="empty-message"
+                    >
+
+                        No students found for this section.
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+
+        {% if students %}
+
+        <div class="table-actions">
+
+
+            <button
+                type="button"
+                class="btn-mark-all"
+                onclick="markAllPresent()"
+            >
+
+                Mark All Present
+
+            </button>
+
+
+            <button
+                type="submit"
+                class="btn-save"
+            >
+
+                Save Attendance
+
+            </button>
+
+
+        </div>
+
+        {% endif %}
+
+    </form>
+
+    {% endif %}
+
+</div>
+
+
+<script>
+
+function updateBadgeColor(selectElement) {
+
+    selectElement.classList.remove(
+        'present',
+        'absent',
+        'late'
+    );
+
+    const value =
+        selectElement.value.toLowerCase();
+
+    selectElement.classList.add(value);
+}
+
+
+function markAllPresent() {
+
+    const selects =
+        document.querySelectorAll(
+            '.status-select'
+        );
+
+    selects.forEach(function(select) {
+
+        select.value = 'PRESENT';
+
+        updateBadgeColor(select);
+
+    });
+
+}
+
+</script>
+
+{% endblock %}

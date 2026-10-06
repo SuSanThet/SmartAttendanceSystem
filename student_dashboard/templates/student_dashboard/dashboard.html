@@ -1,0 +1,946 @@
+{% extends 'student_dashboard/base.html' %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+    .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .welcome h1 {
+        font-size: 22px;
+        color: #0f172a;
+    }
+
+    .welcome p {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: 4px;
+    }
+
+    .date-badge {
+        background-color: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+
+    /* STAT CARDS */
+
+    .dashboard-grid {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        background-color: white;
+        flex: 1;
+        padding: 18px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .stat-card p {
+        font-size: 11px;
+        color: #64748b;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .stat-card h2 {
+        font-size: 26px;
+        margin: 8px 0;
+        color: #0f172a;
+    }
+
+    .stat-card h2.green {
+        color: #10b981;
+    }
+
+    .stat-card h2.red {
+        color: #ef4444;
+    }
+
+    .card-subtext {
+        font-size: 11px;
+        color: #64748b;
+    }
+
+
+    /* PROGRESS */
+
+    .progress-container {
+        background-color: #f1f5f9;
+        height: 4px;
+        border-radius: 2px;
+        margin-top: 10px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        background-color: #2563eb;
+        height: 100%;
+        border-radius: 2px;
+    }
+
+
+    /* QR CARD */
+
+    .qr-card {
+        background-color: #1d4ed8;
+        color: white;
+        flex: 1.2;
+        padding: 18px;
+        border-radius: 12px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .qr-card h3 {
+        font-size: 15px;
+        margin: 0;
+    }
+
+    .scan-btn {
+        background-color: white;
+        color: #1d4ed8;
+        border: none;
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+
+    /* TABLE */
+
+    .split-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .table-box {
+        background-color: white;
+        flex: 1;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+
+    .table-header h3,
+    .bar-chart-box h3,
+    .donut-box h3 {
+        margin: 0;
+        font-size: 15px;
+        color: #0f172a;
+    }
+
+    .table-header a {
+        font-size: 11px;
+        color: #2563eb;
+        text-decoration: none;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table td {
+        padding: 10px 5px;
+        font-size: 12px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+
+    /* BADGES */
+
+    .badge {
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: bold;
+    }
+
+    .badge.upcoming {
+        background-color: #fff7ed;
+        color: #ea580c;
+    }
+    .badge.ongoing {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    }
+
+    .badge.completed {
+    background-color: #f1f5f9;
+    color: #475569;
+     }
+    .badge.present {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge.absent {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge.late {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+
+    /* CHARTS */
+
+    .charts-row {
+        display: flex;
+        gap: 20px;
+    }
+
+    .bar-chart-box {
+        flex: 2;
+        background-color: white;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .bars-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        height: 160px;
+        margin-top: 20px;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0 5px;
+    }
+
+    .bar-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        width: 6%;
+        height: 100%;
+        gap: 5px;
+    }
+
+    .bar {
+        background-color: #bfdbfe;
+        width: 70%;
+        min-height: 2px;
+        border-radius: 3px 3px 0 0;
+        transition: all 0.2s ease;
+    }
+
+    .bar:hover {
+        background-color: #60a5fa;
+    }
+
+    .bar.active {
+        background-color: #2563eb;
+    }
+
+    .bar-wrapper span {
+        font-size: 10px;
+        color: #64748b;
+    }
+
+    .bar-percentage {
+        font-size: 9px;
+        color: #475569;
+        margin-bottom: 3px;
+    }
+
+
+    /* DONUT */
+
+    .donut-box {
+        flex: 1;
+        background-color: white;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .donut {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+
+        background:
+            conic-gradient(
+                #10b981 0% {{ attendance_rate }}%,
+                #ef4444 {{ attendance_rate }}% 100%
+            );
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        position: relative;
+
+        margin-top: 20px;
+    }
+
+    .donut-center {
+        width: 85px;
+        height: 85px;
+
+        background: white;
+
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 18px;
+        font-weight: bold;
+
+        color: #0f172a;
+    }
+
+
+    /* ATTENDANCE DETAILS */
+
+    .attendance-details {
+        margin-top: 15px;
+        font-size: 11px;
+        color: #64748b;
+        text-align: center;
+        line-height: 1.8;
+    }
+
+    .attendance-details strong {
+        color: #0f172a;
+    }
+
+    .attendance-status {
+        margin-top: 8px;
+        font-size: 11px;
+        font-weight: bold;
+    }
+
+
+    /* HOLIDAY */
+
+    .holiday-box {
+        text-align: center;
+        padding: 30px 10px;
+        color: #64748b;
+    }
+
+    .holiday-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+    }
+
+    .holiday-title {
+        font-size: 14px;
+        font-weight: bold;
+        color: #0f172a;
+    }
+
+    .holiday-text {
+        font-size: 11px;
+        margin-top: 4px;
+    }
+
+
+    /* EMPTY */
+
+    .empty-data {
+        text-align: center;
+        color: #94a3b8;
+        font-size: 12px;
+        padding: 25px 0;
+    }
+
+
+    /* MOBILE */
+
+    @media (max-width: 900px) {
+
+        .dashboard-grid,
+        .split-row,
+        .charts-row {
+            flex-direction: column;
+        }
+
+        .bar-wrapper {
+            width: 7%;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- TOP -->
+
+<div class="top-row">
+
+    <div class="welcome">
+
+        <h1>
+            Welcome back,
+            {{ request.user.get_full_name|default:request.user.username }}
+            👋
+        </h1>
+
+        <p>
+            Here's your attendance overview
+        </p>
+
+    </div>
+
+    <div class="date-badge">
+
+        📅 {% now "l, d F Y" %}
+
+    </div>
+
+</div>
+
+
+<!-- STAT CARDS -->
+
+<div class="dashboard-grid">
+
+
+    <!-- OVERALL -->
+
+    <div class="stat-card">
+
+        <p>
+            Overall Attendance
+        </p>
+
+        <h2
+            class="
+                {% if attendance_rate >= 75 %}
+                    green
+                {% else %}
+                    red
+                {% endif %}
+            "
+        >
+            {{ attendance_rate|floatformat:1 }}%
+        </h2>
+
+        <div class="progress-container">
+
+            <div
+                class="progress-bar"
+                style="
+                    width:
+                    {% if attendance_rate > 100 %}
+                        100
+                    {% else %}
+                        {{ attendance_rate }}
+                    {% endif %}
+                    %;
+                "
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TOTAL CLASSES -->
+
+    <div class="stat-card">
+
+        <p>
+            Total Classes
+        </p>
+
+        <h2>
+            {{ expected }}
+        </h2>
+
+        <div class="card-subtext">
+            This month
+        </div>
+
+    </div>
+
+
+    <!-- PRESENT -->
+
+    <div class="stat-card">
+
+        <p>
+            Present
+        </p>
+
+        <h2 class="green">
+            {{ present }}
+        </h2>
+
+        <div class="card-subtext">
+            This month
+        </div>
+
+    </div>
+
+
+    <!-- LATE -->
+
+    <div class="stat-card">
+
+        <p>
+            Late
+        </p>
+
+        <h2>
+            {{ late }}
+        </h2>
+
+        <div class="card-subtext">
+            This month
+        </div>
+
+    </div>
+
+
+    <!-- ABSENT -->
+
+    <div class="stat-card">
+
+        <p>
+            Absent
+        </p>
+
+        <h2 class="red">
+            {{ absent }}
+        </h2>
+
+        <div class="card-subtext">
+            This month
+        </div>
+
+    </div>
+
+
+    <!-- QR -->
+
+    <div class="qr-card">
+
+        <h3>
+            Scan QR Attendance
+        </h3>
+
+        <button
+            class="scan-btn"
+            id="qrScanBtn"
+        >
+            Scan Now &rarr;
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- TODAY + RECENT -->
+
+<div class="split-row">
+<!-- TODAY'S CLASSES -->
+
+<div class="table-box">
+
+    <div class="table-header">
+
+        <h3>
+            Today's Classes
+        </h3>
+
+        {% if not is_holiday %}
+
+            <a href="#">
+                View All
+            </a>
+
+        {% endif %}
+
+    </div>
+
+
+    {% if is_holiday %}
+
+        <!-- WEEKEND -->
+
+        <div class="holiday-box">
+
+            <div class="holiday-icon">
+                🎉
+            </div>
+
+            <div class="holiday-title">
+                Weekend Holiday
+            </div>
+
+            <div class="holiday-text">
+                No classes today
+            </div>
+
+        </div>
+
+
+    {% elif todays_classes %}
+
+        <!-- TODAY'S CLASS TABLE -->
+
+        <table class="data-table">
+
+            <thead>
+
+                <tr>
+                </tr>
+            </thead>
+
+
+            <tbody>
+
+                {% for item in todays_classes %}
+
+                <tr>
+
+                    <!-- TIME -->
+
+                    <td>
+                        {{ item.time }}
+                    </td>
+
+
+                    <!-- SUBJECT -->
+
+                    <td>
+
+                        <strong>
+                            {{ item.subject }}
+                        </strong>
+
+                    </td>
+
+
+                    <!-- CODE -->
+
+                    <td>
+                        {{ item.code }}
+                    </td>
+
+
+                    <!-- TEACHER -->
+
+                    <td>
+                        {{ item.teacher }}
+                    </td>
+
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        {% if item.status == "PRESENT" %}
+
+                            <span class="badge present">
+                                Present
+                            </span>
+
+
+                        {% elif item.status == "LATE" %}
+
+                            <span class="badge late">
+                                Late
+                            </span>
+
+
+                        {% elif item.status == "ABSENT" %}
+
+                            <span class="badge absent">
+                                Absent
+                            </span>
+
+
+                        {% elif item.status == "Ongoing" %}
+
+                            <span class="badge ongoing">
+                                Ongoing
+                            </span>
+
+
+                        {% elif item.status == "Completed" %}
+
+                            <span class="badge completed">
+                                Completed
+                            </span>
+
+
+                        {% else %}
+
+                            <span class="badge upcoming">
+                                Upcoming
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+
+    {% else %}
+
+        <!-- NO CLASS -->
+
+        <div class="empty-data">
+
+            No classes today.
+
+        </div>
+
+    {% endif %}
+
+</div>
+    <!-- RECENT ATTENDANCE -->
+
+    <div class="table-box">
+
+        <div class="table-header">
+
+            <h3>
+                Recent Attendance
+            </h3>
+
+        </div>
+
+
+        <table class="data-table">
+
+            <tbody>
+
+                {% if recent_attendance %}
+
+                    {% for record in recent_attendance %}
+
+                    <tr>
+
+                        <td>
+                            {{ record.date|date:"d M Y" }}
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ record.schedule.subject.name }}
+                            </strong>
+                        </td>
+
+                        <td>
+
+                            {% if record.status == "PRESENT" %}
+
+                                <span class="badge present">
+                                    Present
+                                </span>
+
+                            {% elif record.status == "ABSENT" %}
+
+                                <span class="badge absent">
+                                    Absent
+                                </span>
+
+                            {% elif record.status == "LATE" %}
+
+                                <span class="badge late">
+                                    Late
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="3"
+                            class="empty-data"
+                        >
+                            No attendance records.
+                        </td>
+
+                    </tr>
+
+                {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- MONTHLY CHART + DONUT -->
+
+<div class="charts-row">
+
+
+    <!-- MONTHLY ATTENDANCE -->
+
+    <div class="bar-chart-box">
+
+        <h3>
+            Monthly Attendance Overview
+        </h3>
+
+
+        <div class="bars-container">
+
+            {% for item in monthly_data %}
+
+            <div class="bar-wrapper">
+
+
+                <!-- PERCENTAGE -->
+
+                <div class="bar-percentage">
+
+                    {{ item.percentage|floatformat:0 }}%
+
+                </div>
+
+
+                <!-- BAR -->
+
+                <div
+                    class="
+                        bar
+                        {% if item.is_current %}
+                            active
+                        {% endif %}
+                    "
+                    style="
+                        height:
+                        {% if item.percentage > 0 %}
+                            {{ item.percentage }}%
+                        {% else %}
+                            2px
+                        {% endif %}
+                    ;"
+                    title="{{ item.label }}: {{ item.percentage|floatformat:1 }}%"
+                ></div>
+
+
+                <!-- MONTH -->
+
+                <span>
+                    {{ item.label }}
+                </span>
+
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <!-- DONUT -->
+
+    <div class="donut-box">
+
+        <h3>
+            Attendance This Month
+        </h3>
+
+
+        <div class="donut">
+
+            <div class="donut-center">
+                {{ attendance_rate|floatformat:1 }}%
+            </div>
+
+        </div>
+
+
+
+
+        <!-- STATUS -->
+
+        {% if attendance_rate < 75 %}
+
+            <div
+                class="attendance-status"
+                style="color:#ef4444;"
+            >
+                Below 75%
+            </div>
+
+        {% else %}
+
+            <div
+                class="attendance-status"
+                style="color:#10b981;"
+            >
+                Good Attendance
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+</div>
+
+
+{% endblock %}

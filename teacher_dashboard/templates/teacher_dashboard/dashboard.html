@@ -1,0 +1,817 @@
+{% extends 'teacher_dashboard/baseteacher.html' %}
+
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block content %}
+
+<style>
+    .main-content {
+        align-items: flex-start;
+        justify-content: flex-start;
+        overflow-y: auto;
+    }
+
+    .dashboard-page {
+        width: 100%;
+    }
+
+    /* ---------- Top bar ---------- */
+    .dash-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .dash-title-wrap {
+        display: flex;
+        align-items: center;
+    }
+
+    .sidebar-toggle-btn {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #334155;
+        cursor: pointer;
+        margin-right: 14px;
+    }
+
+    .dash-title-group h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .dash-title-group p {
+        font-size: 14px;
+        color: #64748b;
+        margin-top: 2px;
+    }
+
+    .dash-actions {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+    }
+    .monthly-chart {
+    height: 260px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 20px;
+}
+
+.month-column {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.month-value {
+    font-size: 10px;
+    color: #64748b;
+    margin-bottom: 5px;
+}
+
+.bar-area {
+    width: 100%;
+    height: 190px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.month-bar {
+    width: 55%;
+    min-height: 2px;
+    background: #2563eb;
+    border-radius: 5px 5px 0 0;
+}
+
+.month-label {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 8px;
+}
+    .notif-bell {
+        position: relative;
+        font-size: 19px;
+        color: #334155;
+        cursor: pointer;
+    }
+
+    .notif-badge {
+        position: absolute;
+        top: -6px;
+        right: -8px;
+        background-color: #ef4444;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dash-user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .dash-user img {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: #e2e8f0;
+    }
+
+    .dash-user-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    /* ---------- Stat cards ---------- */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .stat-icon.blue {
+        background-color: #dbeafe;
+        color: #2563eb;
+    }
+
+    .stat-icon.green {
+        background-color: #dcfce7;
+        color: #16a34a;
+    }
+
+    .stat-icon.red {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .stat-icon.purple {
+        background-color: #ede9fe;
+        color: #7c3aed;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 600;
+        margin-top: 2px;
+    }
+
+    .stat-sub {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-top: 2px;
+    }
+
+    /* ---------- Generic card ---------- */
+    .dash-card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .dash-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .dash-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .dash-card-link {
+        font-size: 13px;
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 6px;
+    }
+
+    .dash-card-link:hover {
+        text-decoration: underline;
+    }
+
+    .week-select {
+        font-size: 13px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        color: #334155;
+        background-color: #fff;
+    }
+
+    .row-2col {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* ---------- Today's classes ---------- */
+    .class-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .class-item:last-child {
+        border-bottom: none;
+    }
+
+    .class-time {
+        font-size: 13px;
+        font-weight: 700;
+        color: #334155;
+        width: 72px;
+        flex-shrink: 0;
+    }
+
+    .class-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .class-code {
+        font-size: 12px;
+        color: #94a3b8;
+    }
+
+    .class-status {
+        margin-left: auto;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+        white-space: nowrap;
+    }
+
+    .class-status.ongoing {
+        background-color: #dcfce7;
+        color: #15803d;
+    }
+
+    .class-status.upcoming {
+        background-color: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .class-status.completed {
+        background-color: #dcfce7;
+        color: #15803d;
+    }
+
+    /* ---------- Notifications ---------- */
+    .notif-item {
+        display: flex;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .notif-item:last-child {
+        border-bottom: none;
+    }
+
+    .notif-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background-color: #eff6ff;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .notif-text {
+        font-size: 13.5px;
+        color: #334155;
+        line-height: 1.4;
+    }
+
+    .notif-time {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-top: 2px;
+    }
+
+    /* ---------- Top attendance ---------- */
+    .top-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .top-item:last-child {
+        border-bottom: none;
+    }
+
+    .top-rank {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background-color: #f1f5f9;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .top-name {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .top-class {
+        font-size: 12px;
+        color: #94a3b8;
+    }
+
+    .top-percent {
+        margin-left: auto;
+        font-size: 13px;
+        font-weight: 700;
+        color: #16a34a;
+    }
+
+    @media (max-width: 1100px) {
+        .stats-row {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .row-2col {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .stats-row {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar-toggle-btn {
+            display: inline-block;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            z-index: 50;
+        }
+
+        .sidebar.sidebar-open {
+            transform: translateX(0);
+        }
+    }
+    .monthly-chart-container {
+    position: relative;
+    width: 100%;
+    height: 260px;
+}
+</style>
+
+
+<div class="dashboard-page">
+
+    <!-- TOP BAR -->
+
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- STAT CARDS -->
+    <!-- ===================================================== -->
+
+    <div class="stats-row">
+
+
+        <!-- TOTAL STUDENTS -->
+
+        <div class="stat-card">
+
+            <div class="stat-icon blue">
+                <i class="fa-solid fa-users"></i>
+            </div>
+
+            <div>
+
+                <div class="stat-value">
+                    {{ total_students }}
+                </div>
+
+                <div class="stat-label">
+                    Total Students
+                </div>
+
+                <div class="stat-sub">
+                    All Classes
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PRESENT TODAY -->
+
+        <div class="stat-card">
+
+            <div class="stat-icon green">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <div>
+
+                <div class="stat-value">
+                    {{ present_today }}
+                </div>
+
+                <div class="stat-label">
+                    Present Today
+                </div>
+
+                <div class="stat-sub">
+                    {{ attendance_rate }}% of students
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ABSENT TODAY -->
+
+        <div class="stat-card">
+
+            <div class="stat-icon red">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+
+            <div>
+
+                <div class="stat-value">
+                    {{ absent_today }}
+                </div>
+
+                <div class="stat-label">
+                    Absent Today
+                </div>
+
+                <div class="stat-sub">
+                    {{ absent_percent }}% of students
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ATTENDANCE RATE -->
+
+        <div class="stat-card">
+
+            <div class="stat-icon purple">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+
+            <div>
+
+                <div class="stat-value">
+                    {{ monthly_attendance_rate }}%
+                </div>
+
+                <div class="stat-label">
+                    Attendance Rate
+                </div>
+
+                <div class="stat-sub">
+                    This Month
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- WEEKLY CHART + TODAY'S CLASSES -->
+    <!-- ===================================================== -->
+
+    <div class="row-2col">
+
+<!-- Monthly Attendance Overview -->
+<div class="dash-card">
+
+    <div class="dash-card-header">
+        <span class="dash-card-title">
+            Monthly Attendance Overview
+        </span>
+
+        <span style="font-size:12px;color:#64748b;">
+            {{ current_year }}
+        </span>
+    </div>
+
+    <div class="monthly-chart">
+
+        {% for item in monthly_data %}
+
+        <div class="month-column">
+
+            <div class="month-value">
+                {{ item.percentage }}%
+            </div>
+
+            <div class="bar-area">
+
+                <div
+                    class="month-bar"
+                    style="height: {{ item.percentage }}%;"
+                ></div>
+
+            </div>
+
+            <div class="month-label">
+                {{ item.label }}
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+        <!-- TODAY'S CLASSES -->
+
+        <div class="dash-card">
+
+            <div class="dash-card-header">
+
+                <span class="dash-card-title">
+                    Today's Classes
+                </span>
+
+            </div>
+
+
+            {% for c in todays_classes %}
+
+                <div class="class-item">
+
+                    <div class="class-time">
+                        {{ c.time }}
+                    </div>
+
+                    <div>
+
+                        <div class="class-name">
+                            {{ c.code }}
+                        </div>
+
+                        <div class="class-code">
+                            {{ c.name }}
+                        </div>
+
+                    </div>
+
+                    <span
+                        class="class-status {{ c.status|lower }}"
+                    >
+                        {{ c.status }}
+                    </span>
+
+                </div>
+
+            {% empty %}
+
+                <p
+                    style="
+                        color:#94a3b8;
+                        font-size:13px;
+                    "
+                >
+                    No classes scheduled today.
+                </p>
+
+            {% endfor %}
+
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- NOTIFICATIONS + TOP ATTENDANCE -->
+    <!-- ===================================================== -->
+
+    <div class="row-2col">
+
+
+        <!-- RECENT NOTIFICATIONS -->
+
+        <div class="dash-card">
+
+            <div class="dash-card-header">
+
+                <span class="dash-card-title">
+                    Recent Notifications
+                </span>
+
+            </div>
+            {% if unread_notifications %}
+            <span class="notif-badge">
+                 {{ unread_notifications }}
+            </span>
+            {% endif %}
+
+            {% for n in notifications %}
+
+                <div class="notif-item">
+
+                    <div class="notif-icon">
+
+                        <i class="fa-solid fa-file-lines"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="notif-text">
+                            {{ n.text }}
+                        </div>
+
+                        <div class="notif-time">
+                            {{ n.time }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <p
+                    style="
+                        color:#94a3b8;
+                        font-size:13px;
+                    "
+                >
+                    No new notifications.
+                </p>
+
+            {% endfor %}
+
+
+            <a
+                href="{%url 'emails:teacher_email_home'%}"
+                class="dash-card-link"
+            >
+                View All Notifications
+            </a>
+
+        </div>
+
+
+        <!-- TOP ATTENDANCE -->
+
+        <div class="dash-card">
+
+            <div class="dash-card-header">
+
+                <span class="dash-card-title">
+                    Some Attendance (This Month)
+                </span>
+
+            </div>
+
+
+            {% for s in top_attendance %}
+
+                <div class="top-item">
+
+                    <div class="top-rank">
+                        {{ forloop.counter }}
+                    </div>
+
+                    <div>
+
+                        <div class="top-name">
+                            {{ s.name }}
+                        </div>
+
+                        <div class="top-class">
+                            {{ s.class_name }}
+                        </div>
+
+                    </div>
+
+                    <span class="top-percent">
+                        {{ s.attendance }}%
+                    </span>
+
+                </div>
+
+            {% empty %}
+
+                <p
+                    style="
+                        color:#94a3b8;
+                        font-size:13px;
+                    "
+                >
+                    No data yet.
+                </p>
+
+            {% endfor %}
+
+
+            <a
+                href="{%url 'teacher_dashboard:reports'%}"
+                class="dash-card-link"
+            >
+                View Full Report
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
