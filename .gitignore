@@ -4,7 +4,7 @@ venv/
 
 #python
 __pycache__/
-*.pyc
+*.py[cod]
 
 #Django
 db.sqlite3
@@ -13,7 +13,7 @@ db.sqlite3
 #pycharm
 .idea/
 #QR codes
-media/student_qr/
+smartattendancesystem/media/
 
 #environment variables
 .env
