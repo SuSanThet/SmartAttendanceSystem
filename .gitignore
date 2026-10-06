@@ -13,7 +13,7 @@ db.sqlite3
 #pycharm
 .idea/
 #QR codes
-smartattendancesystem/media/
+media/
 
 #environment variables
 .env
