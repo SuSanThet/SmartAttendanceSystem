@@ -1,0 +1,19 @@
+#Virtual environment
+.venv/
+venv/
+
+#python
+__pycache__/
+*.pyc
+
+#Django
+db.sqlite3
+*.log
+
+#pycharm
+.idea/
+#QR codes
+media/student_qr/
+
+#environment variables
+.env
